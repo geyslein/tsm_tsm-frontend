@@ -2,7 +2,7 @@ from django.contrib import admin
 
 # Register your models here.
 
-from .models import SftpSettings, MqttSettings, ParserType, Parser, Database, Datasource, Thing
+from .models import Parser, Thing
 
 
 class ParserInline(admin.StackedInline):
@@ -11,29 +11,26 @@ class ParserInline(admin.StackedInline):
     classes = ['collapse']
 
 
-class SftpSettingsInline(admin.StackedInline):
-    model = SftpSettings
-
-
-class MqttSettingsInline(admin.StackedInline):
-    model = MqttSettings
-
-
-class DatasourceAdmin(admin.ModelAdmin):
-    model = Datasource
-    inlines = [SftpSettingsInline, MqttSettingsInline]
-
-    class Media:
-        js = ('shuttle_form.js',)
-
-
 class ThingAdmin(admin.ModelAdmin):
     model = Thing
     inlines = [ParserInline]
 
+    fieldsets = [
+        (None, {
+            'fields': ('name','thing_id','project','database','datasource_type',),
+        }),
+        ('SFTP-Settings', {
+            'fields': ('sftp_uri', 'sftp_username', 'sftp_password', 'sftp_filename_pattern',),
+            'classes': ('collapse', 'sftp-settings',),
+        }),
+        ('MQTT-Settings', {
+            'fields': ('mqtt_uri', 'mqtt_username', 'mqtt_password', 'mqtt_topic',),
+            'classes': ('collapse', 'mqtt-settings',),
+        })
+    ]
 
-admin.site.register(Datasource, DatasourceAdmin)
-admin.site.register(Database)
-admin.site.register(Parser)
+    class Media:
+        js = ('thing_form.js',)
+
+
 admin.site.register(Thing, ThingAdmin)
-admin.site.register(ParserType)

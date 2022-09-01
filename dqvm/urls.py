@@ -16,25 +16,25 @@ Including another URLconf
 from django.contrib import admin
 from django.urls import path, include
 from django.contrib.auth.models import User
-from main.models import ParserType
-from rest_framework import routers, serializers, viewsets
+#from main.models import ParserType
+from rest_framework import routers #, serializers, viewsets
 
 from django.conf import settings
 from django.conf.urls.static import static
 
-class ParserTypeSerializer(serializers.HyperlinkedModelSerializer):
-    class Meta:
-        model = ParserType
-        fields = ['name']
-
-
-class ParserTypeViewSet(viewsets.ModelViewSet):
-    queryset = ParserType.objects.all()
-    serializer_class = ParserTypeSerializer
+# class ParserTypeSerializer(serializers.HyperlinkedModelSerializer):
+#     class Meta:
+#         model = ParserType
+#         fields = ['name']
+#
+#
+# class ParserTypeViewSet(viewsets.ModelViewSet):
+#     queryset = ParserType.objects.all()
+#     serializer_class = ParserTypeSerializer
 
 
 router = routers.DefaultRouter()
-router.register(r'parsertypes', ParserTypeViewSet)
+#router.register(r'parsertypes', ParserTypeViewSet)
 
 urlpatterns = [
     path('', include(router.urls)),
