@@ -4,11 +4,16 @@
 # Getting Started
 
 - docker-compose build
+- docker-compose up -d
 - docker-compose exec web bash
 - python manage.py migrate
 - python manage.py createsuperuser
 - python manage.py collectstatic --no-input
 - python manage.py loaddata admin_interface_theme_foundation.json
+
+
+- open admin frontend at: http://localhost:8000/admin/
+- open rest api at: http://localhost:8000/things/
 
 
 # Resources
