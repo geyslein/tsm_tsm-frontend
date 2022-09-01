@@ -1,4 +1,5 @@
 Django~=4.0.3
 psycopg2~=2.8
 django-admin-interface
+django-apptemplates
 djangorestframework

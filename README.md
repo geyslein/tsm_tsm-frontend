@@ -22,3 +22,4 @@
 
 ## alternate Django theme
 - https://github.com/fabiocaccamo/django-admin-interface
+  - Um weiterhin Templates selbst anpassen zu können: https://github.com/bittner/django-apptemplates
