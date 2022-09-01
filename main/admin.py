@@ -2,28 +2,38 @@ from django.contrib import admin
 
 # Register your models here.
 
-from .models import Shuttle, SftpSettings, MqttSettings, RawdataStorage, ParserType, Parser, DatastoreType, Datastore, Datasource
+from .models import SftpSettings, MqttSettings, ParserType, Parser, Database, Datasource, Thing
 
 
-class SftpSettingsInline(admin.TabularInline):
+class ParserInline(admin.StackedInline):
+    model = Parser
+    extra = 1
+    classes = ['collapse']
+
+
+class SftpSettingsInline(admin.StackedInline):
     model = SftpSettings
 
 
-class MqttSettingsInline(admin.TabularInline):
+class MqttSettingsInline(admin.StackedInline):
     model = MqttSettings
 
 
-class ShuttleAdmin(admin.ModelAdmin):
-    model = Shuttle
+class DatasourceAdmin(admin.ModelAdmin):
+    model = Datasource
     inlines = [SftpSettingsInline, MqttSettingsInline]
 
     class Media:
         js = ('shuttle_form.js',)
 
 
-admin.site.register(Shuttle, ShuttleAdmin)
-admin.site.register(Datasource)
-admin.site.register(DatastoreType)
-admin.site.register(Datastore)
+class ThingAdmin(admin.ModelAdmin):
+    model = Thing
+    inlines = [ParserInline]
+
+
+admin.site.register(Datasource, DatasourceAdmin)
+admin.site.register(Database)
 admin.site.register(Parser)
+admin.site.register(Thing, ThingAdmin)
 admin.site.register(ParserType)

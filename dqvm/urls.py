@@ -19,6 +19,8 @@ from django.contrib.auth.models import User
 from main.models import ParserType
 from rest_framework import routers, serializers, viewsets
 
+from django.conf import settings
+from django.conf.urls.static import static
 
 class ParserTypeSerializer(serializers.HyperlinkedModelSerializer):
     class Meta:
@@ -37,6 +39,6 @@ router.register(r'parsertypes', ParserTypeViewSet)
 urlpatterns = [
     path('', include(router.urls)),
     path('admin/', admin.site.urls),
-]
+] + static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
 
 admin.site.enable_nav_sidebar = False
