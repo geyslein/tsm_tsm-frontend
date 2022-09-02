@@ -1,5 +1,7 @@
 from django.contrib import admin
 from django import forms
+from django.forms.models import BaseInlineFormSet
+from django.core.exceptions import ValidationError
 
 # Register your models here.
 
@@ -12,8 +14,15 @@ class ParserInline(admin.StackedInline):
     classes = ['collapse']
 
 
+class SftpConfigInlineFormSet(BaseInlineFormSet):
+    def clean(self):
+        if self.instance.datasource_type == 'SFTP':
+            return
+
+
 class SftpConfigInline(admin.StackedInline):
     model = SftpConfig
+    formset = SftpConfigInlineFormSet
     classes = ['collapse']
 
 
@@ -28,13 +37,7 @@ class ThingForm(forms.ModelForm):
         fields = ('__all__')
 
     def clean(self):
-        cleaned_data = super().clean()
-        type = cleaned_data.get("datasource_type")
-
-        #if type == 'SFTP':
-            # TODO
-            # self.add_error('datasource_type', 'Please enter Config for selected datasource type!')
-
+        raise ValidationError(self.cleaned_data)
 
 class ThingAdmin(admin.ModelAdmin):
     model = Thing
@@ -55,16 +58,6 @@ class ThingAdmin(admin.ModelAdmin):
         if request.user.is_superuser:
             return qs
         return qs.filter(userid=request.user)
-
-
-
-    def clean(self):
-        cleaned_data = super().clean()
-        type = cleaned_data.get("datasource_type")
-
-        self.add_error('datasource_type', 'Please enter Config for selected datasource type!')
-
-
 
     def save_model(self, request, obj, form, change):
         if not request.user.is_superuser:
