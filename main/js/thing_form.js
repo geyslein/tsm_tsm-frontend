@@ -1,19 +1,19 @@
 
-function toggleFieldsets(sets1, sets2, value) {
+function toggleFieldsets(set1, set2, value) {
     if (value === 'SFTP') {
-        sets1[0].style.display = 'block'
-        sets2[0].style.display = 'none'
+        set1.style.display = 'block'
+        set2.style.display = 'none'
     } else {
-        sets1[0].style.display = 'none'
-        sets2[0].style.display = 'block'
+        set1.style.display = 'none'
+        set2.style.display = 'block'
     }
 }
 
 function initDynamicField()
 {
     const field = document.getElementById("id_datasource_type")
-    const sftp_fields = document.getElementsByClassName("sftp-settings")
-    const mqtt_fields = document.getElementsByClassName("mqtt-settings")
+    const sftp_fields = document.getElementById("sftpconfig-group")
+    const mqtt_fields = document.getElementById("mqttconfig-group")
 
     if(field === null) {
         return;
