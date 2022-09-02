@@ -35,9 +35,10 @@ class Thing(models.Model):
     mqtt_topic = models.CharField(max_length=1000, blank=True, null=True)
     userid = models.ForeignKey(settings.AUTH_USER_MODEL, null=True, blank=True, on_delete=models.SET_NULL)
 
+    def __str__(self):
+        return ('{} - {} ({})').format(self.name, self.thing_id, self.datasource_type)
 
 class Parser(models.Model):
-    name = models.CharField(max_length=200)
     parser_type = models.CharField(
         max_length=10,
         choices=[('CSV', 'CSV'), ],
