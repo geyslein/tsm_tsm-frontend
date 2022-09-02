@@ -31,10 +31,10 @@ class ParserSerializer(serializers.ModelSerializer):
 
 
 class ThingSerializer(serializers.HyperlinkedModelSerializer):
-    parser = ParserSerializer(many=True)
+    #parser = ParserSerializer(many=True)
     class Meta:
         model = Thing
-        fields = ['name', 'thing_id', 'parser']
+        fields = ['name', 'thing_id', 'project']
 
 
 class ThingViewSet(viewsets.ModelViewSet):
