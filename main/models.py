@@ -1,4 +1,5 @@
 import uuid
+from django.conf import settings
 from django.db import models
 
 
@@ -16,7 +17,7 @@ class Thing(models.Model):
     name = models.CharField(max_length=1000)
     thing_id = models.CharField(max_length=1000)
     project = models.CharField(max_length=1000)
-    database = models.ForeignKey(Database, on_delete=models.CASCADE)
+    database = models.ForeignKey(Database, on_delete=models.CASCADE, blank=True, null=True)
     datasource_type = models.CharField(
         max_length=4,
         choices=[('SFTP', 'SFTP'), ('MQTT', 'MQTT'), ],
@@ -30,6 +31,7 @@ class Thing(models.Model):
     mqtt_username = models.CharField(max_length=1000, blank=True, null=True)
     mqtt_password = models.CharField(max_length=1000, blank=True, null=True)
     mqtt_topic = models.CharField(max_length=1000, blank=True, null=True)
+    userid = models.ForeignKey(settings.AUTH_USER_MODEL, null=True, blank=True, on_delete=models.SET_NULL)
 
 
 class Parser(models.Model):
