@@ -27,9 +27,12 @@ class ThingAdmin(admin.ModelAdmin):
 
     fieldsets = [
         (None, {
-            'fields': ('name', 'thing_id', 'project', 'datasource_type',),
+            'fields': ('name', 'thing_id', 'database', 'project', 'datasource_type',),
         })
     ]
+
+    def get_readonly_fields(self, request, obj):
+        return ['thing_id', 'database',]
 
     def get_queryset(self, request):
         qs = super().get_queryset(request)

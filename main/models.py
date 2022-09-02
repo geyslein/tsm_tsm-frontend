@@ -15,7 +15,9 @@ class Database(models.Model):
 
 class Thing(models.Model):
     name = models.CharField(max_length=1000)
-    thing_id = models.CharField(max_length=1000)
+    thing_id = models.UUIDField(
+        default=uuid.uuid4,
+        editable=False)
     project = models.CharField(max_length=1000)
     database = models.ForeignKey(Database, on_delete=models.CASCADE, blank=True, null=True)
     datasource_type = models.CharField(
