@@ -36,7 +36,7 @@ class Thing(models.Model):
     userid = models.ForeignKey(settings.AUTH_USER_MODEL, null=True, blank=True, on_delete=models.SET_NULL)
 
     def __str__(self):
-        return ('{} - {} ({})').format(self.name, self.thing_id, self.datasource_type)
+        return self.name
 
 class Parser(models.Model):
     parser_type = models.CharField(

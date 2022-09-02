@@ -49,6 +49,7 @@ class ThingAdmin(admin.ModelAdmin):
         })
     ]
     form = ThingForm
+    list_display = ('name', 'thing_id', 'project', 'datasource_type')
 
     def get_readonly_fields(self, request, obj):
         return ['thing_id', 'database',]
@@ -69,3 +70,4 @@ class ThingAdmin(admin.ModelAdmin):
 
 
 admin.site.register(Thing, ThingAdmin)
+
