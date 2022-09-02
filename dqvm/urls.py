@@ -34,7 +34,7 @@ class ThingSerializer(serializers.HyperlinkedModelSerializer):
     parser = ParserSerializer(many=True)
     class Meta:
         model = Thing
-        fields = '__all__'
+        fields = ['name', 'thing_id', 'parser']
 
 
 class ThingViewSet(viewsets.ModelViewSet):
