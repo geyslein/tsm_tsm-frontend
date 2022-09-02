@@ -12,6 +12,7 @@ class ParserInline(admin.StackedInline):
     model = Parser
     extra = 1
     classes = ['collapse']
+    fields = ['parser_type', 'delimiter', 'exclude_headlines', ('time_column', 'timestamp_expression'), ('start_time', 'end_time')]
 
 
 class ThingForm(forms.ModelForm):
