@@ -1,33 +1,16 @@
 from django.contrib import admin
 from django import forms
-from django.forms.models import BaseInlineFormSet
-from django.core.exceptions import ValidationError
 
 # Register your models here.
+from .models import Parser, Thing
 
-from .models import Parser, Thing, SftpConfig, MqttConfig
 
+sftp_fields = ['sftp_uri','sftp_username','sftp_password','sftp_filename_pattern',]
+mqtt_fields = ['mqtt_uri','mqtt_username','mqtt_password','mqtt_topic',]
 
 class ParserInline(admin.StackedInline):
     model = Parser
     extra = 1
-    classes = ['collapse']
-
-
-class SftpConfigInlineFormSet(BaseInlineFormSet):
-    def clean(self):
-        if self.instance.datasource_type == 'SFTP':
-            return
-
-
-class SftpConfigInline(admin.StackedInline):
-    model = SftpConfig
-    formset = SftpConfigInlineFormSet
-    classes = ['collapse']
-
-
-class MqttConfigInline(admin.StackedInline):
-    model = MqttConfig
     classes = ['collapse']
 
 
@@ -37,15 +20,31 @@ class ThingForm(forms.ModelForm):
         fields = ('__all__')
 
     def clean(self):
-        raise ValidationError(self.cleaned_data)
+        form_data = self.cleaned_data
+        configs = [('SFTP', sftp_fields), ('MQTT', mqtt_fields)]
+
+        for (type, fields) in configs:
+            if form_data['datasource_type'] == type:
+                for field in fields:
+                    if form_data[field] is None or form_data[field] == '':
+                        self.add_error(field, 'This field could not be empty.')
+
 
 class ThingAdmin(admin.ModelAdmin):
     model = Thing
-    inlines = [SftpConfigInline, MqttConfigInline, ParserInline]
+    inlines = [ParserInline]
 
     fieldsets = [
         (None, {
             'fields': ('name', 'thing_id', 'database', 'project', 'datasource_type',),
+        }),
+        ('SFTP-Settings', {
+            'fields': sftp_fields,
+            'classes': ('collapse', 'sftp-settings',),
+        }),
+        ('MQTT-Settings', {
+            'fields': mqtt_fields,
+            'classes': ('collapse', 'mqtt-settings',),
         })
     ]
     form = ThingForm

@@ -25,31 +25,15 @@ class Thing(models.Model):
         choices=[('SFTP', 'SFTP'), ('MQTT', 'MQTT'), ],
         default='SFTP',
     )
+    sftp_uri = models.CharField(max_length=1000, blank=True, null=True)
+    sftp_username = models.CharField(max_length=1000, blank=True, null=True)
+    sftp_password = models.CharField(max_length=1000, blank=True, null=True)
+    sftp_filename_pattern = models.CharField(max_length=200, blank=True, null=True)
+    mqtt_uri = models.CharField(max_length=1000, blank=True, null=True)
+    mqtt_username = models.CharField(max_length=1000, blank=True, null=True)
+    mqtt_password = models.CharField(max_length=1000, blank=True, null=True)
+    mqtt_topic = models.CharField(max_length=1000, blank=True, null=True)
     userid = models.ForeignKey(settings.AUTH_USER_MODEL, null=True, blank=True, on_delete=models.SET_NULL)
-
-
-class SftpConfig(models.Model):
-    thing = models.OneToOneField(
-        Thing,
-        on_delete=models.CASCADE,
-        primary_key=True,
-    )
-    uri = models.CharField(max_length=1000)
-    username = models.CharField(max_length=1000)
-    password = models.CharField(max_length=1000)
-    topic = models.CharField(max_length=1000)
-
-
-class MqttConfig(models.Model):
-    thing = models.OneToOneField(
-        Thing,
-        on_delete=models.CASCADE,
-        primary_key=True,
-    )
-    sftp_uri = models.CharField(max_length=1000)
-    sftp_username = models.CharField(max_length=1000)
-    sftp_password = models.CharField(max_length=1000)
-    sftp_filename_pattern = models.CharField(max_length=1000)
 
 
 class Parser(models.Model):
