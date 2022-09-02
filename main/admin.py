@@ -40,11 +40,11 @@ class ThingAdmin(admin.ModelAdmin):
         }),
         ('SFTP-Settings', {
             'fields': sftp_fields,
-            'classes': ('collapse', 'sftp-settings',),
+            'classes': ('collapse', 'sftp-config',),
         }),
         ('MQTT-Settings', {
             'fields': mqtt_fields,
-            'classes': ('collapse', 'mqtt-settings',),
+            'classes': ('collapse', 'mqtt-config',),
         })
     ]
     form = ThingForm
