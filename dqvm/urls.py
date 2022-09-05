@@ -47,7 +47,7 @@ router.register(r'things', ThingViewSet)
 
 urlpatterns = [
     path('', include(router.urls)),
-    path('admin/', admin.site.urls),
+    path('tsm/', admin.site.urls),
 ] + static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
 
 admin.site.enable_nav_sidebar = False
