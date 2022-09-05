@@ -58,4 +58,4 @@ class Parser(models.Model):
     #is_default = models.BooleanField(default=False)    => validate
 
     def __str__(self):
-        return self.name
+        return str(self.id) + ' ' + self.parser_type

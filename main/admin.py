@@ -32,6 +32,11 @@ class ParserInline(admin.StackedInline):
     extra = 1
     classes = ['collapse']
     fields = ['parser_type', 'delimiter', 'exclude_headlines', ('time_column', 'timestamp_expression'), ('start_time', 'end_time')]
+    min_num = 1
+    validate_min = True
+
+    def get_formset(self, *args, **kwargs):
+        return super().get_formset(validate_min=self.validate_min, *args, **kwargs)
 
 
 class ThingForm(forms.ModelForm):
