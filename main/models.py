@@ -44,18 +44,17 @@ class Database(models.Model):
 
 class Parser(models.Model):
     parser_type = models.CharField(
-        max_length=10,
-        choices=[('CSV', 'CSV'), ],
+        max_length=100,
+        choices=[('CSV', 'CSV'),('campbell_cr6', 'campbell_cr6'), ],
         default='CSV',
     )
-    delimiter = models.CharField(max_length=200)
-    exclude_headlines = models.IntegerField(default=0)
-    time_column = models.IntegerField()
+    delimiter = models.CharField(max_length=1, blank=True, null=True)
+    exclude_headlines = models.IntegerField(default=0, blank=True, null=True)
+    time_column = models.IntegerField(blank=True, null=True)
     timestamp_expression = models.CharField(max_length=200)
     start_time = models.DateTimeField(blank=True, null=True)
     end_time = models.DateTimeField(blank=True, null=True)
     thing = models.ForeignKey(Thing, on_delete=models.CASCADE)
-    #is_default = models.BooleanField(default=False)    => validate
 
     def __str__(self):
         return str(self.id) + ' ' + self.parser_type

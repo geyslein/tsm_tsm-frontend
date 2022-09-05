@@ -9,8 +9,7 @@ function toggleFieldsets(set1, set2, value) {
     }
 }
 
-function initDynamicField()
-{
+$(document).ready(function() {
     const field = document.getElementById("id_datasource_type")
     const sftp_fields = document.getElementsByClassName("sftp-config")
     const mqtt_fields = document.getElementsByClassName("mqtt-config")
@@ -24,8 +23,4 @@ function initDynamicField()
     })
 
     toggleFieldsets(sftp_fields, mqtt_fields, field.value)
-}
-
-$(document).ready(function() {
-    initDynamicField();
 });

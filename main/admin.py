@@ -31,9 +31,10 @@ class ParserInline(admin.StackedInline):
     model = Parser
     extra = 1
     classes = ['collapse']
-    fields = ['parser_type', 'delimiter', 'exclude_headlines', ('time_column', 'timestamp_expression'), ('start_time', 'end_time')]
+    fields = ['parser_type', ('delimiter', 'exclude_headlines', 'time_column'), 'timestamp_expression', ('start_time', 'end_time')]
     min_num = 1
     validate_min = True
+    delimiter = forms.CharField(label='sdsd', widget=forms.TextInput(attrs={'size': 1 }))
 
     def get_formset(self, *args, **kwargs):
         return super().get_formset(validate_min=self.validate_min, *args, **kwargs)
