@@ -23,3 +23,5 @@
 ## alternate Django theme
 - https://github.com/fabiocaccamo/django-admin-interface
   - Um weiterhin Templates selbst anpassen zu können: https://github.com/bittner/django-apptemplates
+- Um verschachtelte Formulare zu erstellen (Thing > SftpConfig > Parser):
+  - https://github.com/theatlantic/django-nested-admin
