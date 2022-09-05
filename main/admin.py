@@ -2,42 +2,49 @@ from django.contrib import admin
 from django import forms
 from django.db.models.signals import post_save
 from django.dispatch import receiver
-
+import nested_admin
 
 # Register your models here.
-from .models import Database, Parser, Thing
+from .models import Database, Parser, SftpConfig, MqttConfig, Thing
 
 
-sftp_fields = ['sftp_uri','sftp_username','sftp_password','sftp_filename_pattern',]
-mqtt_fields = ['mqtt_uri','mqtt_username','mqtt_password','mqtt_topic',]
-
-
-def get_db_if_exists(thing):
+def get_db(thing):
     try:
         return Database.objects.get(thing_id=thing.id)
     except Database.DoesNotExist:
         return None
 
 
-def get_db_string_if_exists(thing):
-    db = get_db_if_exists(thing)
+def get_db_string(thing):
+    db = get_db(thing)
     if db:
         return 'postgresql://' + db.username + ':' + db.password + '@' + db.url + '/rdm_tsm'
     else:
         return '-'
 
 
-class ParserInline(admin.StackedInline):
+class ParserInline(nested_admin.NestedStackedInline):
     model = Parser
-    extra = 1
+    extra = 0
     classes = ['collapse']
     fields = ['parser_type', ('delimiter', 'exclude_headlines', 'time_column'), 'timestamp_expression', ('start_time', 'end_time')]
     min_num = 1
     validate_min = True
     delimiter = forms.CharField(label='sdsd', widget=forms.TextInput(attrs={'size': 1 }))
+    show_change_link = True
 
     def get_formset(self, *args, **kwargs):
         return super().get_formset(validate_min=self.validate_min, *args, **kwargs)
+
+
+class MqttConfigInline(nested_admin.NestedStackedInline):
+    model = MqttConfig
+
+
+class SftpConfigInline(nested_admin.NestedStackedInline):
+    model = SftpConfig
+    inlines = [ParserInline]
+    fields = ['uri', ('username', 'password'), 'filename_pattern']
 
 
 class ThingForm(forms.ModelForm):
@@ -45,39 +52,20 @@ class ThingForm(forms.ModelForm):
         model = Thing
         fields = ('__all__')
 
-    def clean(self):
-        form_data = self.cleaned_data
-        configs = [('SFTP', sftp_fields), ('MQTT', mqtt_fields)]
 
-        for (type, fields) in configs:
-            if form_data['datasource_type'] == type:
-                for field in fields:
-                    if form_data[field] is None or form_data[field] == '':
-                        self.add_error(field, 'This field could not be empty.')
-
-
-class ThingAdmin(admin.ModelAdmin):
+class ThingAdmin(nested_admin.NestedModelAdmin):
     model = Thing
-    inlines = [ParserInline]
-
+    inlines = [SftpConfigInline, MqttConfigInline]
     fieldsets = [
         (None, {
-            'fields': ('name', 'thing_id', get_db_string_if_exists, 'project', 'datasource_type',),
+            'fields': ('name', 'thing_id', get_db_string, 'project', 'datasource_type',),
         }),
-        ('SFTP-Settings', {
-            'fields': sftp_fields,
-            'classes': ('collapse', 'sftp-config',),
-        }),
-        ('MQTT-Settings', {
-            'fields': mqtt_fields,
-            'classes': ('collapse', 'mqtt-config',),
-        })
     ]
     form = ThingForm
     list_display = ('name', 'thing_id', 'project', 'datasource_type')
 
     def get_readonly_fields(self, request, obj):
-        return ['thing_id', get_db_string_if_exists,]
+        return ['thing_id', get_db_string,]
 
     def get_queryset(self, request):
         qs = super().get_queryset(request)
@@ -105,7 +93,7 @@ admin.site.register(Thing, ThingAdmin)
 def create_database(sender, instance, **kwargs):
     thing = instance
 
-    if get_db_if_exists(instance) is None:
+    if get_db(instance) is None:
         database = Database()
         database.url = 'postgres.intranet.ufz.de:5432'
         database.username = thing.project + '_' + str(thing.thing_id)
