@@ -39,6 +39,7 @@ class ParserInline(nested_admin.NestedStackedInline):
 
 class MqttConfigInline(nested_admin.NestedStackedInline):
     model = MqttConfig
+    fields = ['uri', 'topic', ('username', 'password'), 'device_type']
 
 
 class SftpConfigInline(nested_admin.NestedStackedInline):
