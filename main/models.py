@@ -19,6 +19,10 @@ class Thing(models.Model):
     def __str__(self):
         return self.name
 
+    class Meta:
+        verbose_name = 'Logger'
+        verbose_name_plural = "Logger"
+
 
 class SftpConfig(models.Model):
     uri = models.CharField(max_length=1000)

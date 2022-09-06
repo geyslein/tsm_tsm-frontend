@@ -64,6 +64,7 @@ class ThingAdmin(nested_admin.NestedModelAdmin):
     ]
     form = ThingForm
     list_display = ('name', 'thing_id', 'project', 'datasource_type')
+    get_db_string.short_description = 'DB-Connection'
 
     def get_readonly_fields(self, request, obj):
         return ['thing_id', get_db_string,]
