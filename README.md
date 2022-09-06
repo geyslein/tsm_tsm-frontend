@@ -15,6 +15,13 @@
 - open admin frontend at: http://localhost:8000/admin/
 - open rest api at: http://localhost:8000/things/
 
+# DjangoTheme Customization
+- select the *Foundation* Theme [here](http://localhost:8000/tsm/admin_interface/theme/)
+- insert the [UFZ-Logo](admin-interface/logo/UFZ_Logo_SW_RGB_invertiert_DE.png) in the [Theme-Customization-Form](http://localhost:8000/tsm/admin_interface/theme/2/change/), best size is: 
+  - Max-width: 400
+  - Max-height: 65
+- also insert the [UFZ-Favicon](admin-interface/favicon/favicon.ico) in the same form some more at the bottom 
+ 
 
 # Resources
 - https://docs.djangoproject.com/en/4.0/
