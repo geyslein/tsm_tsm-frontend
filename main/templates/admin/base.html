@@ -1,0 +1,14 @@
+{% extends "admin/base_site.html" %}
+
+{% block title %}Timeseries Management{% endblock %}
+
+{% block usertools %}
+{% if has_permission %}
+<div id="user-tools">
+        <a href="{% url 'about' %}">About</a> /
+
+        <strong>{% firstof user.get_short_name user.get_username %}</strong>
+        <a href="{% url 'admin:logout' %}">Log out</a>
+</div>
+{% endif %}
+{% endblock %}

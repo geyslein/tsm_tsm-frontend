@@ -13,10 +13,11 @@ Including another URLconf
     1. Import the include() function: from django.urls import include, path
     2. Add a URL to urlpatterns:  path('blog/', include('blog.urls'))
 """
-from django.contrib import admin
 from django.urls import path, include
 from django.contrib.auth.models import User
 
+from django.contrib import admin
+from main.admin import basic_site
 from main.models import Thing, Parser
 from rest_framework import routers, serializers, viewsets
 
@@ -47,7 +48,7 @@ router.register(r'things', ThingViewSet)
 
 urlpatterns = [
     path('', include(router.urls)),
+    path('tsm/main/', basic_site.admin_view(basic_site.redirect_basic_users)),
+    path('tsm/about/', basic_site.admin_view(basic_site.about), name='about'),
     path('tsm/', admin.site.urls),
 ] + static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
-
-admin.site.enable_nav_sidebar = False

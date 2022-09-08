@@ -1,5 +1,5 @@
 import uuid
-from django.conf import settings
+from django.contrib.auth.models import Group
 from django.db import models
 
 
@@ -8,20 +8,19 @@ class Thing(models.Model):
     thing_id = models.UUIDField(
         default=uuid.uuid4,
         editable=False)
-    project = models.CharField(max_length=1000)
     datasource_type = models.CharField(
         max_length=4,
         choices=[('SFTP', 'SFTP'), ('MQTT', 'MQTT'), ],
         default='SFTP',
     )
-    userid = models.ForeignKey(settings.AUTH_USER_MODEL, null=True, blank=True, on_delete=models.SET_NULL)
+    group_id = models.ForeignKey(Group, null=True, blank=True, on_delete=models.SET_NULL, verbose_name='Project')
 
     def __str__(self):
         return self.name
 
     class Meta:
-        verbose_name = 'Logger'
-        verbose_name_plural = "Logger"
+        verbose_name = 'Thing'
+        verbose_name_plural = 'Things'
 
 
 class SftpConfig(models.Model):
@@ -29,23 +28,6 @@ class SftpConfig(models.Model):
     username = models.CharField(max_length=1000)
     password = models.CharField(max_length=1000)
     filename_pattern = models.CharField(max_length=200)
-    thing = models.OneToOneField(
-        Thing,
-        on_delete=models.CASCADE,
-        primary_key=True,
-    )
-
-
-class MqttConfig(models.Model):
-    uri = models.CharField(max_length=1000)
-    username = models.CharField(max_length=1000)
-    password = models.CharField(max_length=1000)
-    topic = models.CharField(max_length=1000)
-    device_type = models.CharField(
-        max_length=100,
-        choices=[('campbell_cr6', 'campbell_cr6'), ],
-        default='campbell_cr6',
-    )
     thing = models.OneToOneField(
         Thing,
         on_delete=models.CASCADE,
@@ -67,10 +49,24 @@ class Database(models.Model):
         return self.username
 
 
+class RawDataStorage(models.Model):
+    bucket = models.CharField(max_length=1000)
+    access_key = models.CharField(max_length=200)
+    secret_key = models.CharField(max_length=200)
+    thing = models.OneToOneField(
+        Thing,
+        on_delete=models.CASCADE,
+        primary_key=True,
+    )
+
+    def __str__(self):
+        return self.username
+
+
 class Parser(models.Model):
     parser_type = models.CharField(
         max_length=100,
-        choices=[('CSV', 'CSV'),],
+        choices=[('CSV', 'CSV'), ],
         default='CSV',
     )
     delimiter = models.CharField(max_length=1)
@@ -83,3 +79,23 @@ class Parser(models.Model):
 
     def __str__(self):
         return str(self.id) + ' ' + self.parser_type
+
+
+class MqttDeviceType(models.Model):
+    name = models.CharField(max_length=200)
+
+    def __str__(self):
+        return self.name
+
+
+class MqttConfig(models.Model):
+    uri = models.CharField(max_length=1000)
+    username = models.CharField(max_length=1000)
+    password = models.CharField(max_length=1000)
+    topic = models.CharField(max_length=1000)
+    device_type = models.ForeignKey(MqttDeviceType, on_delete=models.CASCADE)
+    thing = models.OneToOneField(
+        Thing,
+        on_delete=models.CASCADE,
+        primary_key=True,
+    )

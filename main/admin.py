@@ -1,17 +1,30 @@
 from django.contrib import admin
+from django.shortcuts import redirect
+
+from django.template.response import TemplateResponse
+from django.urls import path
+
 from django import forms
 from django.db.models.signals import post_save
 from django.dispatch import receiver
 import nested_admin
 
 # Register your models here.
-from .models import Database, Parser, SftpConfig, MqttConfig, Thing
+from .models import Database, Parser, SftpConfig, MqttConfig, MqttDeviceType, RawDataStorage, Thing
+from .utils import generate_password
 
 
 def get_db(thing):
     try:
         return Database.objects.get(thing_id=thing.id)
     except Database.DoesNotExist:
+        return None
+
+
+def get_storage(thing):
+    try:
+        return RawDataStorage.objects.get(thing_id=thing.id)
+    except RawDataStorage.DoesNotExist:
         return None
 
 
@@ -27,10 +40,11 @@ class ParserInline(nested_admin.NestedStackedInline):
     model = Parser
     extra = 0
     classes = ['collapse']
-    fields = ['parser_type', ('delimiter', 'exclude_headlines', 'time_column'), 'timestamp_expression', ('start_time', 'end_time')]
+    fields = ['parser_type', ('delimiter', 'exclude_headlines', 'time_column'), 'timestamp_expression',
+              ('start_time', 'end_time')]
     min_num = 1
     validate_min = True
-    delimiter = forms.CharField(label='sdsd', widget=forms.TextInput(attrs={'size': 1 }))
+    delimiter = forms.CharField(widget=forms.TextInput(attrs={'size': 1}))
     show_change_link = True
 
     def get_formset(self, *args, **kwargs):
@@ -51,7 +65,7 @@ class SftpConfigInline(nested_admin.NestedStackedInline):
 class ThingForm(forms.ModelForm):
     class Meta:
         model = Thing
-        fields = ('__all__')
+        fields = '__all__'
 
 
 class ThingAdmin(nested_admin.NestedModelAdmin):
@@ -59,36 +73,26 @@ class ThingAdmin(nested_admin.NestedModelAdmin):
     inlines = [SftpConfigInline, MqttConfigInline]
     fieldsets = [
         (None, {
-            'fields': ('name', 'thing_id', get_db_string, 'project', 'datasource_type',),
+            'fields': ('name', 'thing_id', get_db_string, 'group_id', 'datasource_type',),
         }),
     ]
     form = ThingForm
-    list_display = ('name', 'thing_id', 'project', 'datasource_type')
+    list_display = ('name', 'thing_id', 'group_id', 'datasource_type')
     get_db_string.short_description = 'DB-Connection'
 
-    def get_readonly_fields(self, request, obj):
-        return ['thing_id', get_db_string,]
+    def get_readonly_fields(self, instance, obj):
+        return ['thing_id', get_db_string, ]
 
     def get_queryset(self, request):
         qs = super().get_queryset(request)
+
+        users_groups = request.user.groups.all()
         if request.user.is_superuser:
             return qs
-        return qs.filter(userid=request.user)
-
-    def save_model(self, request, obj, form, change):
-
-        # create Minio-Credentials
-        # create JSON for dispatcher
-
-        if not request.user.is_superuser:
-            obj.userid = request.user
-        super().save_model(request, obj, form, change)
+        return qs.filter(group_id__in=users_groups)
 
     class Media:
         js = ('thing_form.js',)
-
-
-admin.site.register(Thing, ThingAdmin)
 
 
 @receiver(post_save, sender=Thing)
@@ -98,7 +102,43 @@ def create_database(sender, instance, **kwargs):
     if get_db(instance) is None:
         database = Database()
         database.url = 'postgres.intranet.ufz.de:5432'
-        database.username = thing.project + '_' + str(thing.thing_id)
-        database.password = '123456'    # TODO
+        database.username = thing.group_id.name + '_' + str(thing.thing_id)
+        database.password = generate_password(40)
         database.thing = thing
         database.save()
+
+
+@receiver(post_save, sender=Thing)
+def create_raw_data_storage(sender, instance, **kwargs):
+    thing = instance
+
+    if get_storage(instance) is None:
+        database = RawDataStorage()
+        database.bucket = thing.group_id.name + '123456'
+        database.access_key = thing.group_id.name + '_' + str(thing.thing_id)
+        database.secret_key = generate_password(40)
+        database.thing = thing
+        database.save()
+
+
+class BasicAdminSite(admin.AdminSite):
+    def about(self, request):
+        context = dict(
+            # Include common variables for rendering the admin template.
+            self.each_context(request),
+        )
+        return TemplateResponse(request, "admin/about.html", context)
+
+    def redirect_basic_users(self, request):
+        if request.user.is_superuser:
+            return self.index(request)
+        return redirect('admin:main_thing_changelist')
+
+
+basic_site = BasicAdminSite()
+basic_site.register(Thing, ThingAdmin)
+basic_site.enable_nav_sidebar = False
+
+admin.site.register(Thing, ThingAdmin)
+admin.site.register(MqttDeviceType)
+admin.site.enable_nav_sidebar = False
