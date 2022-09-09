@@ -27,6 +27,10 @@
 - https://docs.djangoproject.com/en/4.0/
 - https://www.django-rest-framework.org/
 
+### Django AdminSite-API and URL patterns
+- https://docs.djangoproject.com/en/4.0/ref/contrib/admin/#reversing-admin-urls
+- https://docs.djangoproject.com/en/3.2/_modules/django/contrib/admin/sites/
+
 ## alternate Django theme
 - https://github.com/fabiocaccamo/django-admin-interface
   - Um weiterhin Templates selbst anpassen zu können: https://github.com/bittner/django-apptemplates

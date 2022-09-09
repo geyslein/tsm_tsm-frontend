@@ -48,7 +48,8 @@ router.register(r'things', ThingViewSet)
 
 urlpatterns = [
     path('', include(router.urls)),
-    path('tsm/main/', basic_site.admin_view(basic_site.redirect_basic_users)),
+    path('tsm/', basic_site.admin_view(basic_site.redirect_basic_users_on_index_page)),
+    path('tsm/main/', basic_site.admin_view(basic_site.redirect_basic_users_on_main_page)),
     path('tsm/about/', basic_site.admin_view(basic_site.about), name='about'),
     path('tsm/', admin.site.urls),
 ] + static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)

@@ -129,9 +129,14 @@ class BasicAdminSite(admin.AdminSite):
         )
         return TemplateResponse(request, "admin/about.html", context)
 
-    def redirect_basic_users(self, request):
+    def redirect_basic_users_on_index_page(self, request):
         if request.user.is_superuser:
-            return self.index(request)
+            return admin.site.index(request)
+        return redirect('admin:main_thing_changelist')
+
+    def redirect_basic_users_on_main_page(self, request):
+        if request.user.is_superuser:
+            return admin.site.app_index(request, 'main')
         return redirect('admin:main_thing_changelist')
 
 
