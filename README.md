@@ -6,16 +6,14 @@
 - docker-compose build
 - docker-compose up -d
 - docker-compose exec web bash
-- python manage.py migrate
-- python manage.py createsuperuser
-- python manage.py collectstatic --no-input
-- python manage.py loaddata admin_interface_theme_foundation.json
-
+  - python manage.py migrate
+  - python manage.py createsuperuser
+  - python manage.py loaddata admin_interface_theme_foundation.json
 
 - open admin frontend at: http://localhost:8000/admin/
 - open rest api at: http://localhost:8000/things/
 
-# DjangoTheme Customization
+## DjangoTheme Customization
 - select the *Foundation* Theme [here](http://localhost:8000/tsm/admin_interface/theme/)
 - insert the [UFZ-Logo](admin-interface/logo/UFZ_Logo_SW_RGB_invertiert_DE.png) in the [Theme-Customization-Form](http://localhost:8000/tsm/admin_interface/theme/2/change/), best size is: 
   - Max-width: 400
@@ -27,7 +25,7 @@
 - https://docs.djangoproject.com/en/4.0/
 - https://www.django-rest-framework.org/
 
-### Django AdminSite-API and URL patterns
+## Django AdminSite-API and URL patterns
 - https://docs.djangoproject.com/en/4.0/ref/contrib/admin/#reversing-admin-urls
 - https://docs.djangoproject.com/en/3.2/_modules/django/contrib/admin/sites/
 
