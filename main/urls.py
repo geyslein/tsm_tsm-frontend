@@ -1,4 +1,4 @@
-"""dqvm URL Configuration
+"""main URL Configuration
 
 The `urlpatterns` list routes URLs to views. For more information please see:
     https://docs.djangoproject.com/en/4.0/topics/http/urls/
@@ -17,8 +17,8 @@ from django.urls import path, include
 from django.contrib.auth.models import User
 
 from django.contrib import admin
-from main.admin import basic_site
-from main.models import Thing, Parser
+from tsm.admin import basic_site
+from tsm.models import Thing, Parser
 from rest_framework import routers, serializers, viewsets
 
 from django.conf import settings
@@ -49,7 +49,7 @@ router.register(r'things', ThingViewSet)
 urlpatterns = [
     path('', include(router.urls)),
     path('tsm/', basic_site.admin_view(basic_site.redirect_basic_users_on_index_page)),
-    path('tsm/main/', basic_site.admin_view(basic_site.redirect_basic_users_on_main_page)),
+    path('tsm/tsm/', basic_site.admin_view(basic_site.redirect_basic_users_on_main_page)),
     path('tsm/about/', basic_site.admin_view(basic_site.about), name='about'),
     path('tsm/', admin.site.urls),
 ] + static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
