@@ -84,7 +84,7 @@ class ThingAdmin(nested_admin.NestedModelAdmin):
 
     def get_readonly_fields(self, request, obj):
         fields = ['thing_id', get_db_string, ]
-        if obj.isActivated:
+        if obj is not None and obj.isActivated:
             fields.append('isActivated')
         return fields
 
