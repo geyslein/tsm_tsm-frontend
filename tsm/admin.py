@@ -132,12 +132,12 @@ class BasicAdminSite(admin.AdminSite):
     def redirect_basic_users_on_index_page(self, request):
         if request.user.is_superuser:
             return admin.site.index(request)
-        return redirect('admin:main_thing_changelist')
+        return redirect('admin:tsm_thing_changelist')
 
     def redirect_basic_users_on_main_page(self, request):
         if request.user.is_superuser:
             return admin.site.app_index(request, 'tsm')
-        return redirect('admin:main_thing_changelist')
+        return redirect('admin:tsm_thing_changelist')
 
 
 basic_site = BasicAdminSite()
