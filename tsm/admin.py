@@ -11,36 +11,14 @@ import nested_admin
 
 # Register your models here.
 from .models import Database, Parser, SftpConfig, MqttConfig, MqttDeviceType, RawDataStorage, Thing
-from .utils import generate_password
-
-
-def get_db(thing):
-    try:
-        return Database.objects.get(thing_id=thing.id)
-    except Database.DoesNotExist:
-        return None
-
-
-def get_storage(thing):
-    try:
-        return RawDataStorage.objects.get(thing_id=thing.id)
-    except RawDataStorage.DoesNotExist:
-        return None
-
-
-def get_db_string(thing):
-    db = get_db(thing)
-    if db:
-        return 'postgresql://' + db.username + ':' + db.password + '@' + db.url + '/rdm_tsm'
-    else:
-        return '-'
+from .utils import get_db, get_storage, get_db_string, generate_password, start_ingest
 
 
 class ParserInline(nested_admin.NestedStackedInline):
     model = Parser
     extra = 0
     classes = ['collapse']
-    fields = ['parser_type', ('delimiter', 'exclude_headlines', 'time_column'), 'timestamp_expression',
+    fields = [('type', 'delimiter'), ('exclude_headlines', 'exclude_footlines'), ('timestamp_column', 'timestamp_format'),
               ('start_time', 'end_time')]
     min_num = 1
     validate_min = True
@@ -73,19 +51,20 @@ class ThingAdmin(nested_admin.NestedModelAdmin):
     inlines = [SftpConfigInline, MqttConfigInline]
     fieldsets = [
         (None, {
-            'fields': ('name', 'thing_id', get_db_string, 'group_id', 'datasource_type', 'isActivated', ),
+            'fields': ('name', 'thing_id', get_db_string, 'group_id', 'datasource_type', ('is_ready', 'is_active'),),
         }),
     ]
     form = ThingForm
-    list_display = ('name', 'thing_id', 'group_id', 'datasource_type', 'isActivated')
+    list_display = ('name', 'thing_id', 'group_id', 'datasource_type', 'is_ready', 'is_active')
     get_db_string.short_description = 'DB-Connection'
-    list_filter = ('datasource_type', 'group_id', )
-#    list_editable = ('isActivated',)
+    list_filter = ('datasource_type', 'group_id',)
+
+    #    list_editable = ('is_ready',)
 
     def get_readonly_fields(self, request, obj):
-        fields = ['thing_id', get_db_string, ]
-        if obj is not None and obj.isActivated:
-            fields.append('isActivated')
+        fields = ['thing_id', get_db_string, 'is_active']
+        if obj is not None and obj.is_ready:
+            fields.append('is_ready')
         return fields
 
     def get_queryset(self, request):
@@ -101,10 +80,9 @@ class ThingAdmin(nested_admin.NestedModelAdmin):
 
 
 @receiver(post_save, sender=Thing)
-def create_database(sender, instance, **kwargs):
+def add_related_entities(sender, instance, **kwargs):
     thing = instance
-
-    if get_db(instance) is None:
+    if get_db(thing) is None:
         database = Database()
         database.url = 'postgres.intranet.ufz.de:5432'
         database.username = thing.group_id.name + '_' + str(thing.thing_id)
@@ -112,18 +90,16 @@ def create_database(sender, instance, **kwargs):
         database.thing = thing
         database.save()
 
-
-@receiver(post_save, sender=Thing)
-def create_raw_data_storage(sender, instance, **kwargs):
-    thing = instance
-
-    if get_storage(instance) is None:
+    if get_storage(thing) is None:
         database = RawDataStorage()
         database.bucket = thing.group_id.name + '123456'
         database.access_key = thing.group_id.name + '_' + str(thing.thing_id)
         database.secret_key = generate_password(40)
         database.thing = thing
         database.save()
+
+    if thing.is_ready and thing.is_active is False:
+        start_ingest(thing)
 
 
 class BasicAdminSite(admin.AdminSite):

@@ -15,7 +15,8 @@ class Thing(models.Model):
         default='SFTP',
     )
     group_id = models.ForeignKey(Group, null=True, blank=True, on_delete=models.SET_NULL, verbose_name='Project')
-    isActivated = models.BooleanField('Active', default=False)
+    is_ready = models.BooleanField('Ready', default=False)
+    is_active = models.BooleanField('Active', default=False)
 
     def __str__(self):
         return self.name
@@ -66,21 +67,22 @@ class RawDataStorage(models.Model):
 
 
 class Parser(models.Model):
-    parser_type = models.CharField(
+    type = models.CharField(
         max_length=100,
-        choices=[('CSV', 'CSV'), ],
-        default='CSV',
+        choices=[('CsvParser', 'CSV'), ],
+        default='CsvParser',
     )
     delimiter = models.CharField(max_length=1)
     exclude_headlines = models.IntegerField(default=0)
-    time_column = models.IntegerField()
-    timestamp_expression = models.CharField(max_length=200)
+    exclude_footlines = models.IntegerField(default=0)
+    timestamp_column = models.IntegerField()
+    timestamp_format = models.CharField(max_length=200)
     start_time = models.DateTimeField(blank=True, null=True)
     end_time = models.DateTimeField(blank=True, null=True)
     sftp_config = models.ForeignKey(SftpConfig, on_delete=models.CASCADE)
 
     def __str__(self):
-        return str(self.id) + ' ' + self.parser_type
+        return str(self.id) + ' ' + self.type
 
 
 class MqttDeviceType(models.Model):
