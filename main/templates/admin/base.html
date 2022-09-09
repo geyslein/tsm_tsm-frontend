@@ -5,9 +5,11 @@
 {% block usertools %}
 {% if has_permission %}
 <div id="user-tools">
+
+        <i>Logged in as {% firstof user.get_short_name user.get_username %}</i> /
+
         <a href="{% url 'about' %}">About</a> /
 
-        <strong>{% firstof user.get_short_name user.get_username %}</strong>
         <a href="{% url 'admin:logout' %}">Log out</a>
 </div>
 {% endif %}
