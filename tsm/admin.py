@@ -73,15 +73,18 @@ class ThingAdmin(nested_admin.NestedModelAdmin):
     inlines = [SftpConfigInline, MqttConfigInline]
     fieldsets = [
         (None, {
-            'fields': ('name', 'thing_id', get_db_string, 'group_id', 'datasource_type',),
+            'fields': ('name', 'thing_id', get_db_string, 'group_id', 'datasource_type', 'isActivated', ),
         }),
     ]
     form = ThingForm
-    list_display = ('name', 'thing_id', 'group_id', 'datasource_type')
+    list_display = ('name', 'thing_id', 'group_id', 'datasource_type', 'isActivated')
     get_db_string.short_description = 'DB-Connection'
 
-    def get_readonly_fields(self, instance, obj):
-        return ['thing_id', get_db_string, ]
+    def get_readonly_fields(self, request, obj):
+        fields = ['thing_id', get_db_string, ]
+        if obj.isActivated:
+            fields.append('isActivated')
+        return fields
 
     def get_queryset(self, request):
         qs = super().get_queryset(request)

@@ -14,6 +14,7 @@ class Thing(models.Model):
         default='SFTP',
     )
     group_id = models.ForeignKey(Group, null=True, blank=True, on_delete=models.SET_NULL, verbose_name='Project')
+    isActivated = models.BooleanField('Active', default=False)
 
     def __str__(self):
         return self.name
