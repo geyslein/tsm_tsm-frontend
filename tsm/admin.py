@@ -79,6 +79,8 @@ class ThingAdmin(nested_admin.NestedModelAdmin):
     form = ThingForm
     list_display = ('name', 'thing_id', 'group_id', 'datasource_type', 'isActivated')
     get_db_string.short_description = 'DB-Connection'
+    list_filter = ('datasource_type', 'group_id', )
+#    list_editable = ('isActivated',)
 
     def get_readonly_fields(self, request, obj):
         fields = ['thing_id', get_db_string, ]

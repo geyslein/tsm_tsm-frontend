@@ -9,6 +9,7 @@ class Thing(models.Model):
         default=uuid.uuid4,
         editable=False)
     datasource_type = models.CharField(
+        'Ingest Type',
         max_length=4,
         choices=[('SFTP', 'SFTP'), ('MQTT', 'MQTT'), ],
         default='SFTP',
