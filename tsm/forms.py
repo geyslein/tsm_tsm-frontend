@@ -10,10 +10,6 @@ from django.core.exceptions import ValidationError
 class ParserInlineFormset(nested_admin.NestedInlineFormSet):
     model = Parser
 
-    def clean(self):
-        if self.instance == {}:
-            self.instance.delete()
-            self.delete()
 
 class ParserInline(nested_admin.NestedStackedInline):
     model = Parser
