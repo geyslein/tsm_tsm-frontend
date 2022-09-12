@@ -11,17 +11,9 @@ class ParserInlineFormset(nested_admin.NestedInlineFormSet):
     model = Parser
 
     def clean(self):
-        super().clean()
-        if self.instance.thing.datasource_type == 'SFTP':
-            count = 0
-            for form in self.forms:
-                if form.is_valid():
-                    if form.cleaned_data == {}:
-                        continue
-                    count += 1
-            if count < 1:
-                raise ValidationError('Please enter at least one Parser.')
-
+        if self.instance == {}:
+            self.instance.delete()
+            self.delete()
 
 class ParserInline(nested_admin.NestedStackedInline):
     model = Parser
@@ -38,16 +30,24 @@ class MqttInlineFormset(nested_admin.NestedInlineFormSet):
     model = MqttConfig
 
     def clean(self):
-        if self.instance.datasource_type == 'MQTT' and self.cleaned_data == [{}]:
-            raise ValidationError('Please enter MQTT settings.')
+        if self.instance.datasource_type == 'MQTT':
+            for field in ['uri', 'username', 'password', 'topic', ]:
+                for form in self.forms:
+                    form_data = form.cleaned_data
+                    if field not in form_data.keys():
+                        form.add_error(field, 'This field could not be empty.')
 
 
 class SftpInlineFormset(nested_admin.NestedInlineFormSet):
     model = SftpConfig
 
     def clean(self):
-        if self.instance.datasource_type == 'SFTP' and self.cleaned_data == [{}]:
-            raise ValidationError('Please enter SFTP settings.')
+        if self.instance.datasource_type == 'SFTP':
+            for field in ['uri', 'username', 'password', 'filename_pattern', ]:
+                for form in self.forms:
+                    form_data = form.cleaned_data
+                    if field not in form_data.keys():
+                        form.add_error(field, 'This field could not be empty.')
 
 
 class MqttConfigInline(nested_admin.NestedStackedInline):
@@ -55,10 +55,6 @@ class MqttConfigInline(nested_admin.NestedStackedInline):
     can_delete = False
     formset = MqttInlineFormset
     fields = ['uri', 'topic', ('username', 'password'), 'device_type']
-
-    def clean(self):
-        if self.instance.datasource_type == 'MQTT':
-            self.add_error('test')
 
 
 class SftpConfigInline(nested_admin.NestedStackedInline):

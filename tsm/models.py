@@ -14,7 +14,7 @@ class Thing(models.Model):
         choices=[('SFTP', 'SFTP'), ('MQTT', 'MQTT'), ],
         default='SFTP',
     )
-    group_id = models.ForeignKey(Group, null=True, blank=True, on_delete=models.SET_NULL, verbose_name='Project')
+    group_id = models.ForeignKey(Group, on_delete=models.CASCADE, verbose_name='Project')
     is_ready = models.BooleanField('Ready', default=False)
     is_active = models.BooleanField('Active', default=False)
 
@@ -27,10 +27,10 @@ class Thing(models.Model):
 
 
 class SftpConfig(models.Model):
-    uri = models.CharField(max_length=1000)
-    username = models.CharField(max_length=1000)
-    password = models.CharField(max_length=1000)
-    filename_pattern = models.CharField(max_length=200)
+    uri = models.CharField(max_length=1000, blank=True, null=True)
+    username = models.CharField(max_length=1000, blank=True, null=True)
+    password = models.CharField(max_length=1000, blank=True, null=True)
+    filename_pattern = models.CharField(max_length=200, blank=True, null=True)
     thing = models.OneToOneField(
         Thing,
         on_delete=models.CASCADE,
@@ -72,11 +72,11 @@ class Parser(models.Model):
         choices=[('CsvParser', 'CSV'), ],
         default='CsvParser',
     )
-    delimiter = models.CharField(max_length=1)
-    exclude_headlines = models.IntegerField(default=0)
-    exclude_footlines = models.IntegerField(default=0)
-    timestamp_column = models.IntegerField()
-    timestamp_format = models.CharField(max_length=200)
+    delimiter = models.CharField(max_length=1, blank=True, null=True)
+    exclude_headlines = models.IntegerField(default=0, blank=True, null=True)
+    exclude_footlines = models.IntegerField(default=0, blank=True, null=True)
+    timestamp_column = models.IntegerField(blank=True, null=True)
+    timestamp_format = models.CharField(max_length=200, blank=True, null=True)
     start_time = models.DateTimeField(blank=True, null=True)
     end_time = models.DateTimeField(blank=True, null=True)
     sftp_config = models.ForeignKey(SftpConfig, on_delete=models.CASCADE)
@@ -93,10 +93,10 @@ class MqttDeviceType(models.Model):
 
 
 class MqttConfig(models.Model):
-    uri = models.CharField(max_length=1000)
-    username = models.CharField(max_length=1000)
-    password = models.CharField(max_length=1000)
-    topic = models.CharField(max_length=1000)
+    uri = models.CharField(max_length=1000, blank=True, null=True)
+    username = models.CharField(max_length=1000, blank=True, null=True)
+    password = models.CharField(max_length=1000, blank=True, null=True)
+    topic = models.CharField(max_length=1000, blank=True, null=True)
     device_type = models.ForeignKey(MqttDeviceType, on_delete=models.CASCADE)
     thing = models.OneToOneField(
         Thing,
