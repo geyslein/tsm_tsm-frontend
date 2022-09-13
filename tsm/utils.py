@@ -107,7 +107,7 @@ def get_json_config(thing: Thing):
     return config
 
 
-def start_ingest(thing):
+def start_ingest(thing: Thing):
     thing.is_active = True
     thing.save()
 
