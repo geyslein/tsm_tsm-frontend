@@ -11,6 +11,7 @@ from django.dispatch import receiver
 from .models import Database, MqttDeviceType, RawDataStorage, Thing
 from .utils import get_db, get_storage, generate_password, start_ingest
 from .forms import ThingAdmin
+import os
 
 
 class BasicAdminSite(admin.AdminSite):
@@ -46,7 +47,8 @@ def add_related_entities(sender, instance, **kwargs):
     thing = instance
     if get_db(thing) is None:
         database = Database()
-        database.url = 'postgres.intranet.ufz.de:5432'
+        database.url = os.environ.get('TSM_DATABASE_HOST')
+        database.name = os.environ.get('TSM_DATABASE_NAME')
         database.username = thing.group_id.name + '_' + str(thing.thing_id)
         database.password = generate_password(40)
         database.thing = thing

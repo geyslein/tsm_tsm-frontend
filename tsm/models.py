@@ -40,6 +40,7 @@ class SftpConfig(models.Model):
 
 class Database(models.Model):
     url = models.CharField(max_length=1000)
+    name = models.CharField(max_length=1000)
     username = models.CharField(max_length=200)
     password = models.CharField(max_length=200)
     thing = models.OneToOneField(

@@ -20,7 +20,7 @@ def get_storage(thing: Thing):
 def get_db_string(thing: Thing):
     db = get_db(thing)
     if db:
-        return 'postgresql://' + db.username + ':' + db.password + '@' + db.url + '/rdm_tsm'
+        return 'postgresql://{}:{}@{}/{}'.format(db.username, db.password, db.url, db.name)
     else:
         return '-'
 

@@ -22,6 +22,8 @@ services:
       - POSTGRES_NAME=postgres
       - POSTGRES_USER=postgres
       - POSTGRES_PASSWORD=postgres
+      - TSM_DATABASE_HOST=postgres.intranet.ufz.de:5432
+      - TSM_DATABASE_NAME=rdm_tsm
     depends_on:
       - db
 
