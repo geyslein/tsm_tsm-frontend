@@ -5,6 +5,7 @@ from .utils import get_db_string
 import nested_admin
 from django import forms
 from django.core.exceptions import ValidationError
+from .validation import get_number_of_valid_forms, validate_fields
 
 
 class ParserInlineFormset(nested_admin.NestedInlineFormSet):
@@ -15,17 +16,9 @@ class ParserInlineFormset(nested_admin.NestedInlineFormSet):
             return
 
         if self.instance.thing.datasource_type == 'SFTP':
-            count = 0
+            validate_fields(self.forms, ['delimiter', 'timestamp_column', 'timestamp_format', ])
 
-            for form in self.forms:
-                if form.is_valid():
-                    form_data = form.cleaned_data
-                    for field in ['delimiter', 'timestamp_column', 'timestamp_format', ]:
-                        if form_data[field]:
-                            continue
-                        form.add_error(field, 'This field could not be empty.')
-                    count += 1
-
+            count = get_number_of_valid_forms(self.forms)
             if count < 1:
                 raise ValidationError('Please enter at least one Parser.')
 
@@ -46,11 +39,7 @@ class MqttInlineFormset(nested_admin.NestedInlineFormSet):
 
     def clean(self):
         if self.instance.datasource_type == 'MQTT':
-            for field in ['uri', 'username', 'password', 'topic', ]:
-                for form in self.forms:
-                    form_data = form.cleaned_data
-                    if field not in form_data.keys():
-                        form.add_error(field, 'This field could not be empty.')
+            validate_fields(self.forms, ['uri', 'username', 'password', 'topic', ])
 
 
 class SftpInlineFormset(nested_admin.NestedInlineFormSet):
@@ -58,11 +47,7 @@ class SftpInlineFormset(nested_admin.NestedInlineFormSet):
 
     def clean(self):
         if self.instance.datasource_type == 'SFTP':
-            for field in ['uri', 'username', 'password', 'filename_pattern', ]:
-                for form in self.forms:
-                    form_data = form.cleaned_data
-                    if field not in form_data.keys():
-                        form.add_error(field, 'This field could not be empty.')
+            validate_fields(self.forms, ['uri', 'username', 'password', 'filename_pattern', ])
 
 
 class MqttConfigInline(nested_admin.NestedStackedInline):
