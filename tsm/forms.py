@@ -10,6 +10,25 @@ from django.core.exceptions import ValidationError
 class ParserInlineFormset(nested_admin.NestedInlineFormSet):
     model = Parser
 
+    def clean(self):
+        if not hasattr(self.instance, 'thing'):
+            return
+
+        if self.instance.thing.datasource_type == 'SFTP':
+            count = 0
+
+            for form in self.forms:
+                if form.is_valid():
+                    form_data = form.cleaned_data
+                    for field in ['delimiter', 'timestamp_column', 'timestamp_format', ]:
+                        if form_data[field]:
+                            continue
+                        form.add_error(field, 'This field could not be empty.')
+                    count += 1
+
+            if count < 1:
+                raise ValidationError('Please enter at least one Parser.')
+
 
 class ParserInline(nested_admin.NestedStackedInline):
     model = Parser
