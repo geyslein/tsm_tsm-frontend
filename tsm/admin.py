@@ -53,9 +53,11 @@ def add_related_entities(sender, instance, **kwargs):
         database.save()
 
     if get_storage(thing) is None:
+        name = thing.group_id.name + '_' + str(thing.thing_id)
+
         database = RawDataStorage()
-        database.bucket = thing.group_id.name + '123456'
-        database.access_key = thing.group_id.name + '_' + str(thing.thing_id)
+        database.bucket = name
+        database.access_key = name
         database.secret_key = generate_password(40)
         database.thing = thing
         database.save()
