@@ -16,11 +16,11 @@ class ParserInlineFormset(nested_admin.NestedInlineFormSet):
             return
 
         if self.instance.thing.datasource_type == 'SFTP':
-            check_required_fields(self.forms, ['delimiter', 'timestamp_column', 'timestamp_format', ])
+            #check_required_fields(self.forms, ['delimiter', 'timestamp_column', 'timestamp_format', ])
 
-            validate_single_parser(self.forms)
+            #validate_single_parser(self.forms)
 
-            check_parser_time_ranges(self.forms)
+            #check_parser_time_ranges(self.forms)
 
             count = get_number_of_valid_forms(self.forms)
             if count < 1:

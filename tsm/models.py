@@ -43,6 +43,7 @@ class Database(models.Model):
     name = models.CharField(max_length=1000)
     username = models.CharField(max_length=200)
     password = models.CharField(max_length=200)
+    is_created = models.BooleanField(default=False)
     thing = models.OneToOneField(
         Thing,
         on_delete=models.CASCADE,
@@ -54,7 +55,7 @@ class Database(models.Model):
 
 
 class RawDataStorage(models.Model):
-    bucket = models.CharField(max_length=1000)
+    bucket = models.CharField(max_length=63)
     access_key = models.CharField(max_length=200)
     secret_key = models.CharField(max_length=200)
     thing = models.OneToOneField(

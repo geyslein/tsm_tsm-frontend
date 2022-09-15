@@ -4,3 +4,6 @@ django-admin-interface
 django-apptemplates
 django-nested-admin
 djangorestframework
+--extra-index-url https://git.ufz.de/api/v4/projects/2886/packages/pypi/simple
+tsm-datastore-lib>=0.4.0
+paho-mqtt==1.6.1

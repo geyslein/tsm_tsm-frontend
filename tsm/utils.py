@@ -1,6 +1,15 @@
+from typing import List
 import secrets
 import string
-from .models import Database, MqttConfig, RawDataStorage, SftpConfig, Thing
+from .models import Database, MqttConfig, Parser, RawDataStorage, SftpConfig, Thing
+import datetime
+import uuid
+
+from sqlalchemy import create_engine
+from sqlalchemy.orm import sessionmaker, Session
+from .mqtt_actions import publish_thing_config
+
+from tsm_datastore_lib.SqlAlchemy.Model import Thing as Sqla_Thing
 
 
 def get_db(thing: Thing):
@@ -29,7 +38,8 @@ def get_active_parser(thing: Thing):
     try:
         sftp_conf: SftpConfig = SftpConfig.objects.get(thing_id=thing.id)
         if sftp_conf:
-            return sftp_conf.parser_set.all()[0]
+            parsers = sftp_conf.parser_set.all()
+            return select_parser_by_current_date(parsers)
     except RawDataStorage.DoesNotExist:
         return None
 
@@ -43,73 +53,139 @@ def get_mqtt_device(thing: Thing):
         return None
 
 
-def generate_password(length: int):
+def get_random_chars(length: int):
     chars = string.ascii_letters + string.digits
-    password = ''
+    result = ''
 
     for _ in range(length):
-        password += secrets.choice(chars)
+        result += secrets.choice(chars)
 
-    return password
+    return result
+
+
+def create_db_username(thing: Thing):
+    result = thing.group_id.name
+    result = result.lower().replace(' ', '')
+    return result + '_' + get_random_chars(16)
+
+
+def select_parser_by_current_date(parsers: List[Parser]):
+    if len(parsers) == 1:
+        return parsers[0]
+
+    now = datetime.datetime.now
+
+    for parser in parsers:
+        if parser['start_time']:
+            start = parser['start_time']
+            if now.strftime('%Y-%m-%d %H:%M') >= start.strftime('%Y-%m-%d %H:%M'):
+                return parser
+
+        if parser['end_time']:
+            end = parser['end_time']
+
+            if now.strftime('%Y-%m-%d %H:%M') <= end.strftime('%Y-%m-%d %H:%M'):
+                return parser
+
+
+def get_parser_properties(thing: Thing):
+    thing_parser: Parser = get_active_parser(thing)
+
+    default_parser = thing_parser.type
+    parser = {
+        "type": default_parser,
+        "settings": {
+            "delimiter": thing_parser.delimiter,
+            "footlines": thing_parser.exclude_footlines,
+            "headlines": thing_parser.exclude_headlines,
+            "timestamp": {
+                "date": {
+                    "pattern": thing_parser.timestamp_format,
+                    "position": thing_parser.timestamp_column,
+                    "replacement": thing_parser.timestamp_format
+                },
+                "time": {
+                    "pattern": thing_parser.timestamp_format,
+                    "position": thing_parser.timestamp_column,
+                    "replacement": thing_parser.timestamp_format
+                }
+            }
+        }
+    }
+
+    return {
+            "default_parser": default_parser,
+            "parsers": [
+                parser
+            ]
+        }
 
 
 def get_json_config(thing: Thing):
-    storage = get_storage(thing)
+    storage: RawDataStorage = get_storage(thing)
 
-    default_parser = ''
-    parser = {}
+    properties = {}
     if thing.datasource_type == 'SFTP':
-        thing_parser = get_active_parser(thing)
-
-        default_parser = thing_parser.type
-        parser = {
-            "type": default_parser,
-            "settings": {
-                "timestamp_format": thing_parser.timestamp_format,
-                "header": thing_parser.exclude_headlines,
-                "delimiter": thing_parser.delimiter,
-                "timestamp_column": thing_parser.timestamp_column,
-                "skipfooter": thing_parser.exclude_footlines
-            }
-        }
+        properties = get_parser_properties(thing)
 
     if thing.datasource_type == 'MQTT':
         default_parser = get_mqtt_device(thing)
-        parser = {
-            "type": default_parser
+        properties = {
+            "default_parser": default_parser,
+            "parsers": [
+                default_parser
+            ]
         }
+
+    db: Database = get_db(thing)
 
     config = {
         "uuid": str(thing.thing_id),
         "name": thing.name,
         "database": {
-            "username": '',
-            "password": '',
+            "username": db.username,
+            "password": db.password,
             "url": get_db_string(thing),
         },
         "project": {
             "name": thing.group_id.name,
-            "uuid": ''
+            "uuid": str(uuid.uuid4()),
         },
         "raw_data_storage": {
             "bucket_name": storage.bucket,
             "username":  storage.access_key,
             "password": storage.secret_key
         },
-        "description": "automatically generated config",
-        "properties": {
-            "default_parser": default_parser,
-            "parsers": [
-                parser
-            ]
-        }
+        "description": "generated by TSM frontend",
+        "properties": properties
     }
     return config
 
 
-def start_ingest(thing: Thing):
-    thing.is_active = True
-    thing.save()
+def start_ingest(thing: Thing, database: Database):
+    publish_thing_config(get_json_config(thing))
 
-    print(get_json_config(thing))
-    # TODO post config to tsm-dispatcher
+    database.is_created = True
+    database.save()
+
+
+def update_parser_properties_of_thing_in_tsm_db(thing: Thing):
+    conn = get_db_string(thing)
+
+    engine = create_engine(conn)
+    schema_engine = engine.execution_options(schema_translate_map={"per_user": thing.database.username})
+    Session = sessionmaker(bind=schema_engine)
+    session = Session()
+
+    try:
+        sqla_thing = session.query(Sqla_Thing).filter(
+            Sqla_Thing.uuid == str(thing.thing_id)
+        ).first()
+
+        if sqla_thing:
+            sqla_thing.properties = get_parser_properties(thing)
+            session.flush()
+            session.commit()
+            session.close()
+    except:
+        print('could not save thing: ' + str(thing.thing_id))

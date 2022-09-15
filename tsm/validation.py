@@ -12,20 +12,36 @@ def validate_single_parser(forms):
 
 
 def check_parser_time_ranges(forms):
-    parsers = []
-    for form in forms:
-        if form.is_valid():
-            parser = form.cleaned_data
-            parsers.append(parser)
+    count = len(forms)
+    max_index = count - 1
 
-    for index, parser in enumerate(parsers):
+    for index, form in enumerate(forms):
+
+        parser = form.cleaned_data
+
         next_pos = index + 1
-        if next_pos >= len(parsers):
+        if next_pos >= count:
             break
+        next_parser = forms[next_pos].cleaned_data
 
-        next_parser = parsers[next_pos]
+        if count > 1:
+            if index > 0 and not parser['start_time']:
+                forms[index].add_error('start_time', 'Parser must have a Starttime.')
+                continue
+
+            if index < max_index and not parser['end_time']:
+                forms[index].add_error('end_time', 'Parser must have an Endtime.')
+                continue
+
         if parser['end_time'] != next_parser['start_time']:
-            forms[0].add_error('end_time', 'Please check that Parser-Endtime always matches the next Parser-Starttime.')
+            forms[index].add_error('end_time', 'Please check that Parser-Endtime always matches the next Parser-Starttime.')
+
+        if parser['start_time'] and parser['end_time']:
+            start = parser['start_time']
+            end = parser['end_time']
+
+            if start.strftime('%Y-%m-%d %H:%M') >= end.strftime('%Y-%m-%d %H:%M'):
+                forms[index].add_error('end_time', 'Please check that Parser-Endtime is greater than Parser-Starttime.')
 
 
 def get_number_of_valid_forms(forms):
