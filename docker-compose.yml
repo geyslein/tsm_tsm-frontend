@@ -23,7 +23,7 @@ services:
       - POSTGRES_USER=postgres
       - POSTGRES_PASSWORD=postgres
       - POSTGRES_HOST=db
-      - SETUP_DB_AND_STORAGE=False
+      - PRODUCTION_MODE=False
       - TSM_DATABASE_HOST=
       - TSM_DATABASE_NAME=
       - MQTT_BROKER=

@@ -7,12 +7,12 @@ from django.template.response import TemplateResponse
 from django.db.models.signals import post_save
 from django.dispatch import receiver
 
-# Register your models here.
 from .models import Database, MqttDeviceType, RawDataStorage, Thing
-from .utils import create_db_username, get_db, get_storage, get_random_chars, start_ingest, update_parser_properties_of_thing_in_tsm_db
+
+from .utils import create_db_username, get_db, get_storage, get_random_chars, get_json_config
+from .mqtt_actions import publish_thing_config
 from .forms import ThingAdmin
 import os
-import time
 
 
 class BasicAdminSite(admin.AdminSite):
@@ -59,7 +59,7 @@ def process_thing(sender, instance, **kwargs):
 
     if get_storage(thing) is None:
 
-        name = 'ufz_' + str(thing.thing_id) # TODO avoid more than 63 chars but make it more readable
+        name = 'ufz_' + str(thing.thing_id) # TODO: avoid more than 63 chars but make it more readable
 
         storage = RawDataStorage()
         storage.bucket = name
@@ -68,19 +68,11 @@ def process_thing(sender, instance, **kwargs):
         storage.thing = thing
         storage.save()
 
-    if os.environ.get('SETUP_DB_AND_STORAGE'):
-        if thing.is_active and database:
-            if database.is_created:
-                update_parser_properties_of_thing_in_tsm_db(thing)
+    if os.environ.get('PRODUCTION_MODE'):
 
-        if database and thing.is_ready and thing.is_active is False:
-            if not database.is_created:
-                start_ingest(thing, database)
+        # create or update thing in the respective database
+        publish_thing_config(get_json_config(thing))
 
-                # wait for dispatcher creating database.
-                # Otherwise this function will be called too early again (because of saving 'thing')
-                # ('update_parser_properties_of_thing_in_tsm_db' would be called before database exists
-                time.sleep(2)
-
-                thing.is_active = True
-                thing.save()
+        if thing.is_ready and not thing.is_active:
+            thing.is_active = True
+            thing.save()

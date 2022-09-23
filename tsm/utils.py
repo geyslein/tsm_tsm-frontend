@@ -5,12 +5,6 @@ from .models import Database, MqttConfig, Parser, RawDataStorage, SftpConfig, Th
 import datetime
 import uuid
 
-from sqlalchemy import create_engine
-from sqlalchemy.orm import sessionmaker, Session
-from .mqtt_actions import publish_thing_config
-
-from tsm_datastore_lib.SqlAlchemy.Model import Thing as Sqla_Thing
-
 
 def get_db(thing: Thing):
     try:
@@ -160,32 +154,3 @@ def get_json_config(thing: Thing):
         "properties": properties
     }
     return config
-
-
-def start_ingest(thing: Thing, database: Database):
-    publish_thing_config(get_json_config(thing))
-
-    database.is_created = True
-    database.save()
-
-
-def update_parser_properties_of_thing_in_tsm_db(thing: Thing):
-    conn = get_db_string(thing)
-
-    engine = create_engine(conn)
-    schema_engine = engine.execution_options(schema_translate_map={"per_user": thing.database.username})
-    Session = sessionmaker(bind=schema_engine)
-    session = Session()
-
-    try:
-        sqla_thing = session.query(Sqla_Thing).filter(
-            Sqla_Thing.uuid == str(thing.thing_id)
-        ).first()
-
-        if sqla_thing:
-            sqla_thing.properties = get_parser_properties(thing)
-            session.flush()
-            session.commit()
-            session.close()
-    except:
-        print('could not save thing: ' + str(thing.thing_id))
