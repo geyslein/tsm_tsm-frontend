@@ -1,13 +1,13 @@
 from django.contrib import admin
-
+from django.contrib.auth.hashers import make_password, check_password
 from django.shortcuts import redirect
 from django.urls import path
 from django.template.response import TemplateResponse
 
-from django.db.models.signals import post_save
+from django.db.models.signals import post_save, pre_save
 from django.dispatch import receiver
 
-from .models import Database, MqttDeviceType, RawDataStorage, Thing
+from .models import Database, MqttDeviceType, RawDataStorage, Thing, MqttConfig
 
 from .utils import create_db_username, get_db_by_thing, get_storage_by_thing, get_random_chars, get_json_config
 from .mqtt_actions import publish_thing_config
@@ -77,3 +77,10 @@ def process_thing(sender, instance, **kwargs):
             if not thing.is_created:
                 thing.is_created = True
                 thing.save()
+
+
+@receiver(pre_save, sender=MqttConfig)
+def add_mqtt_password_hash(sender, instance, **kwargs):
+    mqtt_config = instance
+    mqtt_config.hashed_password = make_password(
+        mqtt_config.password, hasher='PBKDF2')
