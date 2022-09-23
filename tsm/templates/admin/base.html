@@ -6,6 +6,10 @@
 {% if has_permission %}
 <div id="user-tools">
 
+        <a id="rdm-header-logo-link" href="https://www.ufz.de/rdm" target="_blank">
+            <img id="rdm-header-logo" src="/static/RDM_subline_inverted_white.png" alt="RDM">
+        </a>
+
         <i>Logged in as {% firstof user.get_short_name user.get_username %}</i> /
 
         <a href="{% url 'about' %}">About</a> /
