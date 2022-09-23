@@ -6,22 +6,22 @@ import datetime
 import uuid
 
 
-def get_db(thing: Thing):
+def get_db_by_thing(thing: Thing):
     try:
         return Database.objects.get(thing_id=thing.id)
     except Database.DoesNotExist:
         return None
 
 
-def get_storage(thing: Thing):
+def get_storage_by_thing(thing: Thing):
     try:
         return RawDataStorage.objects.get(thing_id=thing.id)
     except RawDataStorage.DoesNotExist:
         return None
 
 
-def get_db_string(thing: Thing):
-    db = get_db(thing)
+def get_connection_string(thing: Thing):
+    db = get_db_by_thing(thing)
     if db:
         return 'postgresql://{}:{}@{}/{}'.format(db.username, db.password, db.url, db.name)
     else:
@@ -116,7 +116,7 @@ def get_parser_properties(thing: Thing):
 
 
 def get_json_config(thing: Thing):
-    storage: RawDataStorage = get_storage(thing)
+    storage: RawDataStorage = get_storage_by_thing(thing)
 
     properties = {}
     if thing.datasource_type == 'SFTP':
@@ -131,7 +131,7 @@ def get_json_config(thing: Thing):
             ]
         }
 
-    db: Database = get_db(thing)
+    db: Database = get_db_by_thing(thing)
 
     config = {
         "uuid": str(thing.thing_id),
@@ -139,7 +139,7 @@ def get_json_config(thing: Thing):
         "database": {
             "username": db.username,
             "password": db.password,
-            "url": get_db_string(thing),
+            "url": get_connection_string(thing),
         },
         "project": {
             "name": thing.group_id.name,

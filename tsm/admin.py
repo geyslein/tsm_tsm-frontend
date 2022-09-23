@@ -9,7 +9,7 @@ from django.dispatch import receiver
 
 from .models import Database, MqttDeviceType, RawDataStorage, Thing
 
-from .utils import create_db_username, get_db, get_storage, get_random_chars, get_json_config
+from .utils import create_db_username, get_db_by_thing, get_storage_by_thing, get_random_chars, get_json_config
 from .mqtt_actions import publish_thing_config
 from .forms import ThingAdmin
 import os
@@ -46,7 +46,7 @@ admin.site.enable_nav_sidebar = False
 @receiver(post_save, sender=Thing)
 def process_thing(sender, instance, **kwargs):
     thing = instance
-    database = get_db(thing)
+    database = get_db_by_thing(thing)
 
     if database is None:
         database = Database()
@@ -57,7 +57,7 @@ def process_thing(sender, instance, **kwargs):
         database.thing = thing
         database.save()
 
-    if get_storage(thing) is None:
+    if get_storage_by_thing(thing) is None:
 
         name = 'ufz_' + str(thing.thing_id) # TODO: avoid more than 63 chars but make it more readable
 
@@ -68,7 +68,7 @@ def process_thing(sender, instance, **kwargs):
         storage.thing = thing
         storage.save()
 
-    if os.environ.get('PRODUCTION_MODE'):
+    if os.environ.get('PUBLISH_THING_TO_BROKER') is True:
 
         # create or update thing in the respective database
         publish_thing_config(get_json_config(thing))

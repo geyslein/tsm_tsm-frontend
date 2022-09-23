@@ -1,6 +1,6 @@
 
 from .models import Parser, SftpConfig, MqttConfig, MqttDeviceType, RawDataStorage, Thing
-from .utils import get_db_string
+from .utils import get_connection_string
 
 import nested_admin
 from django import forms
@@ -79,16 +79,16 @@ class ThingAdmin(nested_admin.NestedModelAdmin):
     inlines = [SftpConfigInline, MqttConfigInline]
     fieldsets = [
         (None, {
-            'fields': ('name', 'thing_id', get_db_string, 'group_id', 'datasource_type', ('is_ready', 'is_active'),),
+            'fields': ('name', 'thing_id', get_connection_string, 'group_id', 'datasource_type', ('is_ready', 'is_active'),),
         }),
     ]
     form = ThingForm
     list_display = ('name', 'thing_id', 'group_id', 'datasource_type', 'is_ready', 'is_active')
     list_filter = ('datasource_type', 'group_id',)
-    get_db_string.short_description = 'DB-Connection'
+    get_connection_string.short_description = 'DB-Connection'
 
     def get_readonly_fields(self, request, obj):
-        fields = ['thing_id', get_db_string, 'is_active']
+        fields = ['thing_id', get_connection_string, 'is_active']
         if obj is not None and obj.is_ready:
             fields.append('is_ready')
         return fields
