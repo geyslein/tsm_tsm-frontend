@@ -98,6 +98,7 @@ class MqttConfig(models.Model):
     uri = models.CharField(max_length=1000, blank=True, null=True)
     username = models.CharField(max_length=1000, blank=True, null=True)
     password = models.CharField(max_length=1000, blank=True, null=True)
+    hashed_password = models.CharField(max_length=256, blank=True, null=True)
     topic = models.CharField(max_length=1000, blank=True, null=True)
     device_type = models.ForeignKey(MqttDeviceType, on_delete=models.CASCADE, blank=True, null=True)
     thing = models.OneToOneField(
