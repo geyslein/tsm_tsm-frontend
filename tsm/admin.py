@@ -68,11 +68,12 @@ def process_thing(sender, instance, **kwargs):
         storage.thing = thing
         storage.save()
 
-    if os.environ.get('PUBLISH_THING_TO_BROKER') is True:
+    if os.environ.get('PUBLISH_THING_TO_BROKER'):
 
-        # create or update thing in the respective database
-        publish_thing_config(get_json_config(thing))
+        if thing.is_ready:
+            # create or update thing in the respective database
+            publish_thing_config(get_json_config(thing))
 
-        if thing.is_ready and not thing.is_active:
-            thing.is_active = True
-            thing.save()
+            if not thing.is_created:
+                thing.is_created = True
+                thing.save()

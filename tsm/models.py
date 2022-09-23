@@ -16,7 +16,7 @@ class Thing(models.Model):
     )
     group_id = models.ForeignKey(Group, on_delete=models.CASCADE, verbose_name='Project')
     is_ready = models.BooleanField('Ready', default=False)
-    is_active = models.BooleanField('Active', default=False)
+    is_created = models.BooleanField('Created', default=False)
 
     def __str__(self):
         return self.name
