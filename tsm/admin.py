@@ -59,7 +59,7 @@ def process_thing(sender, instance, **kwargs):
 
     if get_storage_by_thing(thing) is None:
 
-        name = 'ufz_' + str(thing.thing_id) # TODO: avoid more than 63 chars but make it more readable
+        name = 'ufz-' + str(thing.thing_id) # TODO: avoid more than 63 chars but make it more readable
 
         storage = RawDataStorage()
         storage.bucket = name
