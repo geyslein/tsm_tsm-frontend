@@ -148,8 +148,8 @@ STATIC_ROOT = 'static/'
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
 STATICFILES_DIRS = [
-    "/code/tsm/js",
-    "/code/tsm/assets",
+    "tsm/js",
+    "tsm/assets",
 ]
 
 
