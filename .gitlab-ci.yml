@@ -52,10 +52,6 @@ default:
 #    - python3 -m unittest discover test
 
 build-images:
-  # Only for debugging
-  # @todo remove this!
-  tags:
-    - ufz-intranet
   stage: build
   image:
     name: gcr.io/kaniko-project/executor:debug
