@@ -10,18 +10,16 @@ cp .env.example .env
 
 ### Setup Django app
 
-@todo: Replace `tsm-frontend_web` by real git.ufz.de registry url!!
-
 ```bash
-docker run --rm --env-file .env tsm-frontend_web migrate
-docker run --rm --env-file .env tsm-frontend_web createsuperuser --noinput
-docker run --rm --env-file .env tsm-frontend_web loaddata admin_interface_theme_foundation.json
+docker run --rm --env-file .env git.ufz.de:4567/rdm-software/timeseries-management/tsm-frontend/tsm-frontend:latest migrate
+docker run --rm --env-file .env git.ufz.de:4567/rdm-software/timeseries-management/tsm-frontend/tsm-frontend:latest createsuperuser --noinput
+docker run --rm --env-file .env git.ufz.de:4567/rdm-software/timeseries-management/tsm-frontend/tsm-frontend:latest loaddata admin_interface_theme_foundation.json
 ```
 
 ### Start Django app in development mode
 
   ```bash
-  docker run --rm --env-file .env -p 127.0.0.1:8000:8000 tsm-frontend_web runserver 0.0.0.0:8000
+  docker run --rm --env-file .env -p 127.0.0.1:8000:8000 git.ufz.de:4567/rdm-software/timeseries-management/tsm-frontend/tsm-frontend:latest runserver 0.0.0.0:8000
   ```
 
 ## With Docker Compose

@@ -63,12 +63,11 @@ build-images:
     - /kaniko/executor --force --build-arg BUILD_DATE="${BUILD_DATE}" --context $CI_PROJECT_DIR --dockerfile $CI_PROJECT_DIR/Dockerfile --destination ${IMAGE_URL}:${CI_JOB_DATE}
 
 integration-test:
-  stage: test
+  stage: "test"
   image:
-    name: ${IMAGE_URL}:${CI_JOB_DATE}
-#    entrypoint: [""]
+    name: "${IMAGE_URL}:${CI_JOB_DATE}"
   script:
-    - check
+    - "python3 manage.py check"
 
 add-release-tags:
   stage: release
