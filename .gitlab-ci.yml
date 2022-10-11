@@ -66,6 +66,7 @@ integration-test:
   stage: "test"
   image:
     name: "${IMAGE_URL}:${CI_JOB_DATE}"
+    entrypoint: [""]
   script:
     - "python3 manage.py check"
 
