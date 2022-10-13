@@ -1,5 +1,5 @@
 {% extends "admin/base_site.html" %}
-
+{% load static %}
 {% block content %}
 
 <div id="info_text">
@@ -7,7 +7,8 @@
     <p>Please contact the <a href="mailto:rdm-contact@ufz.de">RDM-Team</a> in case of content-related or technical questions.</p>
 
     <a href="https://www.ufz.de/rdm" target="_blank">
-        <img id="rdm-logo" src="/static/259253_RDM_subline_fullcolor_rgb.png" alt="RDM">
+        <img id="rdm-logo" src="{% static '259253_RDM_subline_fullcolor_rgb.png' %}"
+             alt="RDM">
     </a>
 </div>
 
