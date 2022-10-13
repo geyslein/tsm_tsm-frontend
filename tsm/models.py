@@ -15,6 +15,7 @@ class Thing(models.Model):
         default='SFTP',
     )
     group = models.ForeignKey(Group, on_delete=models.CASCADE, verbose_name='Project')
+    description = models.CharField(max_length=1000, blank=True, null=True)
     is_ready = models.BooleanField('Ready', default=False)
     is_created = models.BooleanField('Created', default=False)
 

@@ -70,6 +70,8 @@ class SftpConfigInline(nested_admin.NestedStackedInline):
 
 
 class ThingForm(forms.ModelForm):
+    description = forms.CharField(widget=forms.Textarea(attrs={'cols': 60, 'rows': 2}))
+
     class Meta:
         model = Thing
         fields = '__all__'
@@ -79,7 +81,7 @@ class ThingAdmin(nested_admin.NestedModelAdmin):
     inlines = [SftpConfigInline, MqttConfigInline]
     fieldsets = [
         (None, {
-            'fields': ('name', 'thing_id', get_connection_string, 'group', 'datasource_type', ('is_ready', 'is_created'),),
+            'fields': ('name', 'group', 'description', 'thing_id', get_connection_string, 'datasource_type', ('is_ready', 'is_created'),),
         }),
     ]
     form = ThingForm
