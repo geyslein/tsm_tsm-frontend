@@ -1,5 +1,6 @@
 
 from .models import Parser, SftpConfig, MqttConfig, MqttDeviceType, RawDataStorage, Thing
+from django.contrib.auth.models import Group
 from .utils import get_connection_string
 
 import nested_admin
@@ -88,6 +89,13 @@ class ThingAdmin(nested_admin.NestedModelAdmin):
     list_display = ('name', 'thing_id', 'group', 'datasource_type', 'is_ready', 'is_created')
     list_filter = ('datasource_type', 'group',)
     get_connection_string.short_description = 'DB-Connection'
+
+    def formfield_for_foreignkey(self, db_field, request, **kwargs):
+        if not request.user.is_superuser:
+            if db_field.name == "group":
+                kwargs["queryset"] = Group.objects.filter(id__in=request.user.groups.all())
+
+        return super().formfield_for_foreignkey(db_field, request, **kwargs)
 
     def get_readonly_fields(self, request, obj):
         fields = ['thing_id', get_connection_string, 'is_created']
