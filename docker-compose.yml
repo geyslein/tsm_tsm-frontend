@@ -36,6 +36,11 @@ services:
       - "DJANGO_SUPERUSER_USERNAME=${DJANGO_SUPERUSER_USERNAME}"
       - "DJANGO_SUPERUSER_PASSWORD=${DJANGO_SUPERUSER_PASSWORD}"
       - "DJANGO_SUPERUSER_EMAIL=${DJANGO_SUPERUSER_EMAIL:-example@example.com}"
+      - "DJANGO_SECRET_KEY=${DJANGO_SECRET_KEY:?Please define a unique and\
+              secure Django secret key!}"
+      - "DJANGO_DEBUG=${DJANGO_DEBUG:-0}"
+      - "DJANGO_TRUSTED_ORIGINS=${DJANGO_TRUSTED_ORIGINS:-http://localhost:8000}"
+      - "DJANGO_BASE_PATH=${DJANGO_BASE_PATH:-}"
     depends_on:
       - "db"
 
