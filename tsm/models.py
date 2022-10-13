@@ -14,7 +14,7 @@ class Thing(models.Model):
         choices=[('SFTP', 'SFTP'), ('MQTT', 'MQTT'), ],
         default='SFTP',
     )
-    group_id = models.ForeignKey(Group, on_delete=models.CASCADE, verbose_name='Project')
+    group = models.ForeignKey(Group, on_delete=models.CASCADE, verbose_name='Project')
     is_ready = models.BooleanField('Ready', default=False)
     is_created = models.BooleanField('Created', default=False)
 
@@ -37,18 +37,17 @@ class SftpConfig(models.Model):
         primary_key=True,
     )
 
+    class Meta:
+        verbose_name = 'SFTP Configuration'
+        verbose_name_plural = 'SFTP Configuration'
+
 
 class Database(models.Model):
     url = models.CharField(max_length=1000)
     name = models.CharField(max_length=1000)
     username = models.CharField(max_length=200)
     password = models.CharField(max_length=200)
-    is_created = models.BooleanField(default=False)
-    thing = models.OneToOneField(
-        Thing,
-        on_delete=models.CASCADE,
-        primary_key=True,
-    )
+    group = models.ForeignKey(Group, on_delete=models.CASCADE, verbose_name='Project')
 
     def __str__(self):
         return self.username
@@ -106,3 +105,7 @@ class MqttConfig(models.Model):
         on_delete=models.CASCADE,
         primary_key=True,
     )
+
+    class Meta:
+        verbose_name = 'MQTT Configuration'
+        verbose_name_plural = 'MQTT Configuration'

@@ -52,9 +52,9 @@ def process_thing(sender, instance, **kwargs):
         database = Database()
         database.url = os.environ.get('TSM_DATABASE_HOST')
         database.name = os.environ.get('TSM_DATABASE_NAME')
-        database.username = create_db_username(thing)
+        database.username = create_db_username(thing.group)
         database.password = get_random_chars(24)
-        database.thing = thing
+        database.group = thing.group
         database.save()
 
     if get_storage_by_thing(thing) is None:
