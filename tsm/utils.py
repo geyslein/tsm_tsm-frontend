@@ -1,14 +1,16 @@
 from typing import List
+import re
 import secrets
 import string
 from .models import Database, MqttConfig, Parser, RawDataStorage, SftpConfig, Thing
+from django.contrib.auth.models import Group
 import datetime
 import uuid
 
 
 def get_db_by_thing(thing: Thing):
     try:
-        return Database.objects.get(thing_id=thing.id)
+        return Database.objects.get(group=thing.group)
     except Database.DoesNotExist:
         return None
 
@@ -57,10 +59,13 @@ def get_random_chars(length: int):
     return result
 
 
-def create_db_username(thing: Thing):
-    result = thing.group_id.name
-    result = result.lower().replace(' ', '')
-    return result + '_' + get_random_chars(16)
+def create_db_username(group: Group):
+    name = group.name.replace(' ', '')
+    return re.sub(
+        '[^a-z0-9_]+',
+        '',
+        '{shortname}_{uuid}'.format(shortname=name[0:30].lower(), uuid=str(uuid.uuid4()))
+    )
 
 
 def select_parser_by_current_date(parsers: List[Parser]):
@@ -142,7 +147,7 @@ def get_json_config(thing: Thing):
             "url": get_connection_string(thing),
         },
         "project": {
-            "name": thing.group_id.name,
+            "name": thing.group.name,
             "uuid": str(uuid.uuid4()),
         },
         "raw_data_storage": {

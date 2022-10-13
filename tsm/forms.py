@@ -79,12 +79,12 @@ class ThingAdmin(nested_admin.NestedModelAdmin):
     inlines = [SftpConfigInline, MqttConfigInline]
     fieldsets = [
         (None, {
-            'fields': ('name', 'thing_id', get_connection_string, 'group_id', 'datasource_type', ('is_ready', 'is_created'),),
+            'fields': ('name', 'thing_id', get_connection_string, 'group', 'datasource_type', ('is_ready', 'is_created'),),
         }),
     ]
     form = ThingForm
-    list_display = ('name', 'thing_id', 'group_id', 'datasource_type', 'is_ready', 'is_created')
-    list_filter = ('datasource_type', 'group_id',)
+    list_display = ('name', 'thing_id', 'group', 'datasource_type', 'is_ready', 'is_created')
+    list_filter = ('datasource_type', 'group',)
     get_connection_string.short_description = 'DB-Connection'
 
     def get_readonly_fields(self, request, obj):
@@ -99,7 +99,7 @@ class ThingAdmin(nested_admin.NestedModelAdmin):
         users_groups = request.user.groups.all()
         if request.user.is_superuser:
             return qs
-        return qs.filter(group_id__in=users_groups)
+        return qs.filter(group__in=users_groups)
 
     class Media:
         js = ('thing_form.js',)
