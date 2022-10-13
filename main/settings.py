@@ -30,7 +30,7 @@ DEBUG = bool(int(os.environ.get('DJANGO_DEBUG', 0)))
 # Proxy related settings
 USE_X_FORWARDED_HOST = True
 SECURE_PROXY_SSL_HEADER = ('HTTP_X_FORWARDED_PROTO', 'https')
-ALLOWED_HOSTS = ['localhost', '127.0.0.1', '[::1]']
+ALLOWED_HOSTS = list(filter(None, os.environ.get('DJANGO_ALLOWED_HOSTS', '').split(',')))
 CSRF_TRUSTED_ORIGINS = list(filter(None, os.environ.get('DJANGO_TRUSTED_ORIGINS', '').split(',')))
 FORCE_SCRIPT_NAME = os.environ.get('DJANGO_BASE_PATH')
 
