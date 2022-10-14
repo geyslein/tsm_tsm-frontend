@@ -1,8 +1,6 @@
 import uuid
 from django.contrib.auth.models import Group
 from django.db import models
-from django.db import IntegrityError
-from django.core.exceptions import ValidationError
 
 
 class Thing(models.Model):
