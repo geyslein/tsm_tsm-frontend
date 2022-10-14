@@ -1,6 +1,8 @@
 import uuid
 from django.contrib.auth.models import Group
 from django.db import models
+from django.db import IntegrityError
+from django.core.exceptions import ValidationError
 
 
 class Thing(models.Model):
@@ -28,7 +30,8 @@ class Thing(models.Model):
 
 
 class SftpConfig(models.Model):
-    uri = models.CharField(max_length=1000, blank=True, null=True)
+    # uri = models.CharField(max_length=1000, blank=True, null=True)
+    uri = models.URLField(blank=True, null=True)
     username = models.CharField(max_length=1000, blank=True, null=True)
     password = models.CharField(max_length=1000, blank=True, null=True)
     filename_pattern = models.CharField(max_length=200, blank=True, null=True)
@@ -79,8 +82,9 @@ class Parser(models.Model):
     exclude_footlines = models.IntegerField(default=0, blank=True, null=True)
     timestamp_column = models.IntegerField(blank=True, null=True)
     timestamp_format = models.CharField(max_length=200, blank=True, null=True)
-    start_time = models.DateTimeField(blank=True, null=True)
-    end_time = models.DateTimeField(blank=True, null=True)
+    # start_time = models.DateTimeField(blank=True, null=True)
+    # end_time = models.DateTimeField(blank=True, null=True)
+    is_active = models.BooleanField(default=False)
     sftp_config = models.ForeignKey(SftpConfig, on_delete=models.CASCADE)
 
     def __str__(self):

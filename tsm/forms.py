@@ -6,7 +6,7 @@ from .utils import get_connection_string
 import nested_admin
 from django import forms
 from django.core.exceptions import ValidationError
-from .validation import check_parser_time_ranges, validate_single_parser, get_number_of_valid_forms, check_required_fields
+from .validation import check_parser_time_ranges, validate_single_parser, get_number_of_valid_forms, check_required_fields, validate_active_parser
 
 
 class ParserInlineFormset(nested_admin.NestedInlineFormSet):
@@ -18,10 +18,11 @@ class ParserInlineFormset(nested_admin.NestedInlineFormSet):
 
         if self.instance.thing.datasource_type == 'SFTP':
             #check_required_fields(self.forms, ['delimiter', 'timestamp_column', 'timestamp_format', ])
-
             #validate_single_parser(self.forms)
 
             #check_parser_time_ranges(self.forms)
+
+            validate_active_parser(self.forms)
 
             count = get_number_of_valid_forms(self.forms)
             if count < 1:
@@ -33,7 +34,7 @@ class ParserInline(nested_admin.NestedStackedInline):
     formset = ParserInlineFormset
     classes = ['collapse']
     fields = [('type', 'delimiter'), ('exclude_headlines', 'exclude_footlines'), ('timestamp_column', 'timestamp_format'),
-              ('start_time', 'end_time'), ]
+              ('is_active'), ]
     min_num = 1
     extra = 0
     delimiter = forms.CharField(widget=forms.TextInput(attrs={'size': 1}))

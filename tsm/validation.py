@@ -10,6 +10,23 @@ def validate_single_parser(forms):
                 form.add_error('end_time', 'Leave empty if just one Parser.')
     # if there is one parser there should be no start and end => could be hidden...
 
+def validate_active_parser(forms, c=0):
+    count = len(forms)
+    max_index = count - 1
+
+    for index, form in enumerate(forms):
+        print(index)
+
+        parser = form.cleaned_data
+        print(parser)
+
+        if parser['is_active']:
+            print("is true")
+            c+=1
+        if c >1:
+            forms[index].add_error('is_active', 'A thing can have just one active parser!')
+            break
+
 
 def check_parser_time_ranges(forms):
     count = len(forms)
