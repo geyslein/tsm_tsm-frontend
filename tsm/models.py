@@ -76,9 +76,9 @@ class Parser(models.Model):
         default='CsvParser',
     )
     delimiter = models.CharField('Column delimiter', max_length=1, blank=True, null=True)
-    exclude_headlines = models.IntegerField('Number of headlines to exclude', default=0, blank=True, null=True)
-    exclude_footlines = models.IntegerField('Number of footlines to exclude', default=0, blank=True, null=True)
-    timestamp_column = models.IntegerField(blank=True, null=True)
+    exclude_headlines = models.PositiveIntegerField('Number of headlines to exclude', default=0, blank=True, null=True)
+    exclude_footlines = models.PositiveIntegerField('Number of footlines to exclude', default=0, blank=True, null=True)
+    timestamp_column = models.PositiveIntegerField(blank=True, null=True)
     timestamp_format = models.CharField(max_length=200, blank=True, null=True)
     is_active = models.BooleanField(default=False)
     thing = models.ForeignKey(Thing, on_delete=models.CASCADE)
