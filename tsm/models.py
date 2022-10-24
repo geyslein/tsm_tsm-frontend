@@ -3,9 +3,17 @@ from django.contrib.auth.models import Group
 from django.db import models
 
 
+class MqttDeviceType(models.Model):
+    name = models.CharField(max_length=200)
+
+    def __str__(self):
+        return self.name
+
+
 class Thing(models.Model):
     name = models.CharField(max_length=1000)
     thing_id = models.UUIDField(
+        'ID',
         default=uuid.uuid4,
         editable=False)
     datasource_type = models.CharField(
@@ -17,7 +25,16 @@ class Thing(models.Model):
     group = models.ForeignKey(Group, on_delete=models.CASCADE, verbose_name='Project')
     description = models.CharField(max_length=1000, blank=True, null=True)
     is_ready = models.BooleanField('Ready', default=False)
-    is_created = models.BooleanField('Created', default=False)
+    sftp_uri = models.URLField('Fileserver URI', blank=True, null=True)
+    sftp_username = models.CharField('Username', max_length=1000, blank=True, null=True)
+    sftp_password = models.CharField('Password', max_length=1000, blank=True, null=True)
+    sftp_filename_pattern = models.CharField('Filename pattern', max_length=200, blank=True, null=True)
+    mqtt_uri = models.CharField('Broker URI', max_length=1000, blank=True, null=True)
+    mqtt_username = models.CharField('Username', max_length=1000, blank=True, null=True)
+    mqtt_password = models.CharField('Password', max_length=1000, blank=True, null=True)
+    mqtt_hashed_password = models.CharField(max_length=256, blank=True, null=True)
+    mqtt_topic = models.CharField('Topic', max_length=1000, blank=True, null=True)
+    mqtt_device_type = models.ForeignKey(MqttDeviceType, verbose_name='Device Type', on_delete=models.CASCADE, blank=True, null=True)
 
     def __str__(self):
         return self.name
@@ -25,23 +42,6 @@ class Thing(models.Model):
     class Meta:
         verbose_name = 'Thing'
         verbose_name_plural = 'Things'
-
-
-class SftpConfig(models.Model):
-    # uri = models.CharField(max_length=1000, blank=True, null=True)
-    uri = models.URLField(blank=True, null=True)
-    username = models.CharField(max_length=1000, blank=True, null=True)
-    password = models.CharField(max_length=1000, blank=True, null=True)
-    filename_pattern = models.CharField(max_length=200, blank=True, null=True)
-    thing = models.OneToOneField(
-        Thing,
-        on_delete=models.CASCADE,
-        primary_key=True,
-    )
-
-    class Meta:
-        verbose_name = 'SFTP Configuration'
-        verbose_name_plural = 'SFTP Configuration'
 
 
 class Database(models.Model):
@@ -70,45 +70,18 @@ class RawDataStorage(models.Model):
 
 
 class Parser(models.Model):
-    type = models.CharField(
+    type = models.CharField('File type',
         max_length=100,
         choices=[('CsvParser', 'CSV'), ],
         default='CsvParser',
     )
-    delimiter = models.CharField(max_length=1, blank=True, null=True)
-    exclude_headlines = models.IntegerField(default=0, blank=True, null=True)
-    exclude_footlines = models.IntegerField(default=0, blank=True, null=True)
+    delimiter = models.CharField('Column delimiter', max_length=1, blank=True, null=True)
+    exclude_headlines = models.IntegerField('Number of headlines to exclude', default=0, blank=True, null=True)
+    exclude_footlines = models.IntegerField('Number of footlines to exclude', default=0, blank=True, null=True)
     timestamp_column = models.IntegerField(blank=True, null=True)
     timestamp_format = models.CharField(max_length=200, blank=True, null=True)
-    # start_time = models.DateTimeField(blank=True, null=True)
-    # end_time = models.DateTimeField(blank=True, null=True)
     is_active = models.BooleanField(default=False)
-    sftp_config = models.ForeignKey(SftpConfig, on_delete=models.CASCADE)
+    thing = models.ForeignKey(Thing, on_delete=models.CASCADE)
 
     def __str__(self):
         return str(self.id) + ' ' + self.type
-
-
-class MqttDeviceType(models.Model):
-    name = models.CharField(max_length=200)
-
-    def __str__(self):
-        return self.name
-
-
-class MqttConfig(models.Model):
-    uri = models.CharField(max_length=1000, blank=True, null=True)
-    username = models.CharField(max_length=1000, blank=True, null=True)
-    password = models.CharField(max_length=1000, blank=True, null=True)
-    hashed_password = models.CharField(max_length=256, blank=True, null=True)
-    topic = models.CharField(max_length=1000, blank=True, null=True)
-    device_type = models.ForeignKey(MqttDeviceType, on_delete=models.CASCADE, blank=True, null=True)
-    thing = models.OneToOneField(
-        Thing,
-        on_delete=models.CASCADE,
-        primary_key=True,
-    )
-
-    class Meta:
-        verbose_name = 'MQTT Configuration'
-        verbose_name_plural = 'MQTT Configuration'

@@ -2,7 +2,7 @@ from typing import List
 import re
 import secrets
 import string
-from .models import Database, MqttConfig, Parser, RawDataStorage, SftpConfig, Thing
+from .models import Database, Parser, RawDataStorage, Thing
 from django.contrib.auth.models import Group
 import datetime
 import uuid
@@ -31,22 +31,10 @@ def get_connection_string(thing: Thing):
 
 
 def get_active_parser(thing: Thing):
-    try:
-        sftp_conf: SftpConfig = SftpConfig.objects.get(thing_id=thing.id)
-        if sftp_conf:
-            parsers = sftp_conf.parser_set.all()
-            return select_parser_by_current_date(parsers)
-    except RawDataStorage.DoesNotExist:
-        return None
-
-
-def get_mqtt_device(thing: Thing):
-    try:
-        mqtt_conf: MqttConfig = MqttConfig.objects.get(thing_id=thing.id)
-        if mqtt_conf:
-            return mqtt_conf.device_type.name
-    except RawDataStorage.DoesNotExist:
-        return None
+    parsers = Parser.objects.get(thing_id=thing.id)
+    for parser in parsers:
+        if parser.is_active:
+            return parser
 
 
 def get_random_chars(length: int):
@@ -66,25 +54,6 @@ def create_db_username(group: Group):
         '',
         '{shortname}_{uuid}'.format(shortname=name[0:30].lower(), uuid=str(uuid.uuid4()))
     )
-
-
-def select_parser_by_current_date(parsers: List[Parser]):
-    if len(parsers) == 1:
-        return parsers[0]
-
-    now = datetime.datetime.now
-
-    for parser in parsers:
-        if parser['start_time']:
-            start = parser['start_time']
-            if now.strftime('%Y-%m-%d %H:%M') >= start.strftime('%Y-%m-%d %H:%M'):
-                return parser
-
-        if parser['end_time']:
-            end = parser['end_time']
-
-            if now.strftime('%Y-%m-%d %H:%M') <= end.strftime('%Y-%m-%d %H:%M'):
-                return parser
 
 
 def get_parser_properties(thing: Thing):
@@ -128,7 +97,7 @@ def get_json_config(thing: Thing):
         properties = get_parser_properties(thing)
 
     if thing.datasource_type == 'MQTT':
-        default_parser = get_mqtt_device(thing)
+        default_parser = thing.mqtt_device_type.name
         properties = {
             "default_parser": default_parser,
             "parsers": [

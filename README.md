@@ -33,5 +33,3 @@
 - https://github.com/fabiocaccamo/django-admin-interface
   - Um weiterhin Templates selbst anpassen zu können: https://github.com/bittner/django-apptemplates
   - an die default django themes kommt man z.B. so heran: ``docker cp tsm-frontend-web-1:/usr/local/lib/python3.10/site-packages/django/contrib/admin/templates/admin/base_site.html .`` 
-- Um verschachtelte Formulare zu erstellen (Thing > SftpConfig > Parser):
-  - https://github.com/theatlantic/django-nested-admin
