@@ -1,91 +1,102 @@
+from django.contrib import admin
 
-from .models import Parser, SftpConfig, MqttConfig, MqttDeviceType, RawDataStorage, Thing
+from .models import Parser, MqttDeviceType, RawDataStorage, Thing
+from django.contrib.auth.models import Group
 from .utils import get_connection_string
 
-import nested_admin
 from django import forms
 from django.core.exceptions import ValidationError
-from .validation import check_parser_time_ranges, validate_single_parser, get_number_of_valid_forms, check_required_fields
 
 
-class ParserInlineFormset(nested_admin.NestedInlineFormSet):
+class ParserInlineFormset(forms.BaseInlineFormSet):
     model = Parser
 
     def clean(self):
-        if not hasattr(self.instance, 'thing'):
-            return
+        if self.instance.datasource_type == 'SFTP':
+            count_parser = 0
+            count_active_parser = 0
+            for form in self.forms:
+                cleaned_data = form.clean()
 
-        if self.instance.thing.datasource_type == 'SFTP':
-            #check_required_fields(self.forms, ['delimiter', 'timestamp_column', 'timestamp_format', ])
+                for field in ['delimiter', 'timestamp_column', 'timestamp_format', ]:
+                    if cleaned_data[field]:
+                        continue
+                    form.add_error(field, 'This field could not be empty.')
 
-            #validate_single_parser(self.forms)
+                if cleaned_data and not cleaned_data.get('DELETE', False):
+                    count_parser += 1
+                    if cleaned_data['is_active']:
+                        count_active_parser += 1
 
-            #check_parser_time_ranges(self.forms)
+            if count_active_parser == 0:
+                raise ValidationError("A thing with SFTP-Settings must have one active parser.")
 
-            count = get_number_of_valid_forms(self.forms)
-            if count < 1:
-                raise ValidationError('Please enter at least one Parser.')
+            if count_active_parser > 1:
+                raise ValidationError("A thing could only have one active parser.")
 
 
-class ParserInline(nested_admin.NestedStackedInline):
+class ParserInline(admin.StackedInline):
     model = Parser
     formset = ParserInlineFormset
     classes = ['collapse']
     fields = [('type', 'delimiter'), ('exclude_headlines', 'exclude_footlines'), ('timestamp_column', 'timestamp_format'),
-              ('start_time', 'end_time'), ]
+              ('is_active'), ]
     min_num = 1
     extra = 0
     delimiter = forms.CharField(widget=forms.TextInput(attrs={'size': 1}))
 
 
-class MqttInlineFormset(nested_admin.NestedInlineFormSet):
-    model = MqttConfig
-
-    def clean(self):
-        if self.instance.datasource_type == 'MQTT':
-            check_required_fields(self.forms, ['uri', 'username', 'password', 'topic', ])
-
-
-class SftpInlineFormset(nested_admin.NestedInlineFormSet):
-    model = SftpConfig
-
-    def clean(self):
-        if self.instance.datasource_type == 'SFTP':
-            check_required_fields(self.forms, ['uri', 'username', 'password', 'filename_pattern', ])
-
-
-class MqttConfigInline(nested_admin.NestedStackedInline):
-    model = MqttConfig
-    can_delete = False
-    formset = MqttInlineFormset
-    fields = ['uri', 'topic', ('username', 'password'), 'device_type']
-
-
-class SftpConfigInline(nested_admin.NestedStackedInline):
-    model = SftpConfig
-    can_delete = False
-    formset = SftpInlineFormset
-    fields = ['uri', ('username', 'password'), 'filename_pattern']
-    inlines = [ParserInline]
-
-
 class ThingForm(forms.ModelForm):
+    description = forms.CharField(widget=forms.Textarea(attrs={'cols': 60, 'rows': 2}))
+
     class Meta:
         model = Thing
         fields = '__all__'
 
+    def clean(self):
+        cleaned_data = super().clean()
+        fields = []
+        if cleaned_data.get("datasource_type") == 'SFTP':
+            fields = ['sftp_uri', 'sftp_username', 'sftp_password', 'sftp_filename_pattern', ]
 
-class ThingAdmin(nested_admin.NestedModelAdmin):
-    inlines = [SftpConfigInline, MqttConfigInline]
+        if cleaned_data.get("datasource_type") == 'MQTT':
+            fields = ['mqtt_uri', 'mqtt_username', 'mqtt_password', 'mqtt_topic', 'mqtt_device_type', ]
+
+        print(cleaned_data)
+
+        for field in fields:
+            if cleaned_data.get(field):
+                continue
+            self.add_error(field, 'This field could not be empty.')
+
+
+class ThingAdmin(admin.ModelAdmin):
+    inlines = [ParserInline]
     fieldsets = [
         (None, {
-            'fields': ('name', 'thing_id', get_connection_string, 'group_id', 'datasource_type', ('is_ready', 'is_created'),),
+            'fields': ('name', 'group', 'description', 'thing_id', get_connection_string, 'datasource_type', 'is_ready',),
         }),
+        ('SFTP-Settings', {
+            'fields': ('sftp_uri', ('sftp_username', 'sftp_password'), 'sftp_filename_pattern', ),
+            'classes': ('sftp-settings',),
+        }),
+        ('MQTT-Settings', {
+            'fields': (('mqtt_uri', 'mqtt_topic'), ('mqtt_username', 'mqtt_password'), 'mqtt_device_type', ),
+            'classes': ('mqtt-settings',),
+        })
     ]
     form = ThingForm
-    list_display = ('name', 'thing_id', 'group_id', 'datasource_type', 'is_ready', 'is_created')
-    list_filter = ('datasource_type', 'group_id',)
+    list_display = ('name', 'thing_id', 'group', 'datasource_type', 'is_ready')
+    list_filter = ('datasource_type', 'group',)
     get_connection_string.short_description = 'DB-Connection'
+
+    def formfield_for_foreignkey(self, db_field, request, **kwargs):
+        # if not superuser, a user can only select things from his groups (=projects)
+        if not request.user.is_superuser:
+            if db_field.name == "group":
+                kwargs["queryset"] = Group.objects.filter(id__in=request.user.groups.all())
+
+        return super().formfield_for_foreignkey(db_field, request, **kwargs)
 
     def get_readonly_fields(self, request, obj):
         fields = ['thing_id', get_connection_string, 'is_created']
@@ -96,10 +107,11 @@ class ThingAdmin(nested_admin.NestedModelAdmin):
     def get_queryset(self, request):
         qs = super().get_queryset(request)
 
+        # if not superuser, a user can see only things from his groups (=projects)
         users_groups = request.user.groups.all()
         if request.user.is_superuser:
             return qs
-        return qs.filter(group_id__in=users_groups)
+        return qs.filter(group__in=users_groups)
 
     class Media:
         js = ('thing_form.js',)

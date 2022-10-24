@@ -7,7 +7,7 @@ from django.template.response import TemplateResponse
 from django.db.models.signals import post_save, pre_save
 from django.dispatch import receiver
 
-from .models import Database, MqttDeviceType, RawDataStorage, Thing, MqttConfig
+from .models import Database, MqttDeviceType, RawDataStorage, Thing
 
 from .utils import create_db_username, get_db_by_thing, get_storage_by_thing, get_random_chars, get_json_config
 from .mqtt_actions import publish_thing_config
@@ -52,9 +52,9 @@ def process_thing(sender, instance, **kwargs):
         database = Database()
         database.url = os.environ.get('TSM_DATABASE_HOST')
         database.name = os.environ.get('TSM_DATABASE_NAME')
-        database.username = create_db_username(thing)
+        database.username = create_db_username(thing.group)
         database.password = get_random_chars(24)
-        database.thing = thing
+        database.group = thing.group
         database.save()
 
     if get_storage_by_thing(thing) is None:
@@ -68,19 +68,15 @@ def process_thing(sender, instance, **kwargs):
         storage.thing = thing
         storage.save()
 
-    if os.environ.get('PUBLISH_THING_TO_BROKER'):
+    if os.environ.get('PUBLISH_THING_TO_BROKER') is True:
 
         if thing.is_ready:
             # create or update thing in the respective database
             publish_thing_config(get_json_config(thing))
 
-            if not thing.is_created:
-                thing.is_created = True
-                thing.save()
 
-
-@receiver(pre_save, sender=MqttConfig)
+@receiver(pre_save, sender=Thing)
 def add_mqtt_password_hash(sender, instance, **kwargs):
-    mqtt_config = instance
-    mqtt_config.hashed_password = make_password(
-        mqtt_config.password, hasher='PBKDF2')
+    thing = instance
+    thing.mqtt_hashed_password = make_password(
+        thing.mqtt_password, hasher='PBKDF2')
