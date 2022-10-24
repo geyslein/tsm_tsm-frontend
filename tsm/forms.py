@@ -13,18 +13,18 @@ class ParserInlineFormset(forms.BaseInlineFormSet):
 
     def clean(self):
         if self.instance.datasource_type == 'SFTP':
-            count_parser = 0
             count_active_parser = 0
             for form in self.forms:
                 cleaned_data = form.clean()
 
-                for field in ['delimiter', 'timestamp_column', 'timestamp_format', ]:
-                    if cleaned_data[field]:
-                        continue
-                    form.add_error(field, 'This field could not be empty.')
+                if cleaned_data == {}:
+                    continue    # form is empty and will not be saved. Skip validation.
 
-                if cleaned_data and not cleaned_data.get('DELETE', False):
-                    count_parser += 1
+                for field in ['delimiter', 'timestamp_column', 'timestamp_format', ]:
+                    if not cleaned_data[field]:
+                        form.add_error(field, 'This field could not be empty.')
+
+                if not cleaned_data.get('DELETE', False):
                     if cleaned_data['is_active']:
                         count_active_parser += 1
 
