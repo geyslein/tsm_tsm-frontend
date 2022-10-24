@@ -13,13 +13,13 @@ def on_publish(client, userdata, mid):
 
 def publish_thing_config(thing_event_msg_json):
 
-    mqtt_broker = os.environ.get("MQTT_BROKER")
+    mqtt_broker_host = os.environ.get("MQTT_BROKER_HOST")
     mqtt_user = os.environ.get("MQTT_USER")
     mqtt_password = os.environ.get("MQTT_PASSWORD")
 
     client = mqtt.Client("TSM-FRONTEND")
     client.username_pw_set(mqtt_user, mqtt_password)
-    client.connect(mqtt_broker)
+    client.connect(mqtt_broker_host)
     client.on_connect = on_connect
     client.on_publish = on_publish
     client.loop_start()  # important to spawn a thread for receiving acks from broker when using qos>0!
