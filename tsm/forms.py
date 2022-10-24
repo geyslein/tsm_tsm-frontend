@@ -70,6 +70,29 @@ class ThingForm(forms.ModelForm):
             self.add_error(field, 'This field could not be empty.')
 
 
+class ProjectFilter(admin.SimpleListFilter):
+    title = 'Projects'
+    parameter_name = 'project'
+
+    def lookups(self, request, model_admin):
+        result = []
+
+        if request.user.is_superuser:
+            groups = Group.objects.all()
+        else:
+            groups = request.user.groups.all()
+
+        for group in groups:
+            result.append((group.id, group.name))
+        return result
+
+    def queryset(self, request, query_set):
+        if self.value():
+            return query_set.filter(group__id=self.value())
+        else:
+            return query_set
+
+
 class ThingAdmin(admin.ModelAdmin):
     inlines = [ParserInline]
     fieldsets = [
@@ -87,7 +110,7 @@ class ThingAdmin(admin.ModelAdmin):
     ]
     form = ThingForm
     list_display = ('name', 'thing_id', 'group', 'datasource_type', 'is_ready')
-    list_filter = ('datasource_type', 'group',)
+    list_filter = ('datasource_type', ProjectFilter,)
     get_connection_string.short_description = 'DB-Connection'
 
     def formfield_for_foreignkey(self, db_field, request, **kwargs):
