@@ -74,7 +74,7 @@ class ProjectFilter(admin.SimpleListFilter):
     title = 'Projects'
     parameter_name = 'project'
 
-    def lookups(self, request):
+    def lookups(self, request, model_admin):
         result = []
         if request.user.is_superuser:
             groups = Group.objects.all()
