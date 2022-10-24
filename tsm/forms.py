@@ -40,7 +40,7 @@ class ParserInline(admin.StackedInline):
     formset = ParserInlineFormset
     classes = ['collapse']
     fields = [('type', 'delimiter'), ('exclude_headlines', 'exclude_footlines'), ('timestamp_column', 'timestamp_format'),
-              ('is_active'), ]
+              'is_active', ]
     min_num = 1
     extra = 0
     delimiter = forms.CharField(widget=forms.TextInput(attrs={'size': 1}))
@@ -74,9 +74,8 @@ class ProjectFilter(admin.SimpleListFilter):
     title = 'Projects'
     parameter_name = 'project'
 
-    def lookups(self, request, model_admin):
+    def lookups(self, request):
         result = []
-
         if request.user.is_superuser:
             groups = Group.objects.all()
         else:
