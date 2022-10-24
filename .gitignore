@@ -1,6 +1,8 @@
 .idea
 /static/
+.env
 
 /admin-interface/
 !/admin-interface/favicon/favicon.ico
 !/admin-interface/logo/UFZ_Logo_SW_RGB_invertiert_DE.png
+__pycache__

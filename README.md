@@ -1,16 +1,43 @@
-
-
-
 # Getting Started
 
-- docker-compose build
-- docker-compose up -d
-- docker-compose exec web bash
-  - python manage.py migrate
-  - python manage.py createsuperuser
-  - python manage.py loaddata admin_interface_theme_foundation.json
+## With Docker
 
-- open admin frontend at: http://localhost:8000/admin/
+### Create a `.env` file (from `.env.example`) and adjust settings, for example database connection.
+
+```bash
+cp .env.example .env
+```
+
+### Setup Django app
+
+```bash
+docker run --rm --env-file .env git.ufz.de:4567/rdm-software/timeseries-management/tsm-frontend/tsm-frontend:latest migrate
+docker run --rm --env-file .env git.ufz.de:4567/rdm-software/timeseries-management/tsm-frontend/tsm-frontend:latest createsuperuser --noinput
+docker run --rm --env-file .env git.ufz.de:4567/rdm-software/timeseries-management/tsm-frontend/tsm-frontend:latest loaddata admin_interface_theme_foundation.json
+```
+
+### Start Django app in development mode
+
+  ```bash
+  docker run --rm --env-file .env -p 127.0.0.1:8000:8000 git.ufz.de:4567/rdm-software/timeseries-management/tsm-frontend/tsm-frontend:latest runserver 0.0.0.0:8000
+  ```
+
+## With Docker Compose
+
+```bash
+# Build container
+docker-compose build
+# Start database and app container
+docker-compose up -d
+# Do Djangi migrations
+docker-compose run --rm web migrate
+# Create Djagno Admin superuser (with credentials from environment vars)
+docker-compose run --rm web createsuperuser --noinput
+# Load Django fixtures
+docker-compose run --rm web loaddata admin_interface_theme_foundation.json
+```
+
+- open admin frontend at: http://localhost:8000/tsm
 - open rest api at: http://localhost:8000/things/
 
 ## DjangoTheme Customization

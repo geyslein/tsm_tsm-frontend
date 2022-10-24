@@ -22,13 +22,17 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 # See https://docs.djangoproject.com/en/4.0/howto/deployment/checklist/
 
 # SECURITY WARNING: keep the secret key used in production secret!
-SECRET_KEY = 'django-insecure-4q1^w=)berg)5%#o0ow_lrob^4s@_46ldgs8k57f4q#aap^l!n'
+SECRET_KEY = os.environ.get('DJANGO_SECRET_KEY')
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = True
+DEBUG = bool(int(os.environ.get('DJANGO_DEBUG', 0)))
 
-ALLOWED_HOSTS = []
-
+# Proxy related settings
+USE_X_FORWARDED_HOST = True
+SECURE_PROXY_SSL_HEADER = ('HTTP_X_FORWARDED_PROTO', 'https')
+ALLOWED_HOSTS = list(filter(None, os.environ.get('DJANGO_ALLOWED_HOSTS', '').split(',')))
+CSRF_TRUSTED_ORIGINS = list(filter(None, os.environ.get('DJANGO_TRUSTED_ORIGINS', '').split(',')))
+FORCE_SCRIPT_NAME = os.environ.get('DJANGO_BASE_PATH')
 
 # Application definition
 
@@ -147,8 +151,8 @@ STATIC_ROOT = 'static/'
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
 STATICFILES_DIRS = [
-    "/code/tsm/js",
-    "/code/tsm/assets",
+    "tsm/js",
+    "tsm/assets",
 ]
 
 
