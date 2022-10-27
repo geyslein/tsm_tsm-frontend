@@ -7,7 +7,7 @@ from django.template.response import TemplateResponse
 from django.db.models.signals import post_save, pre_save
 from django.dispatch import receiver
 
-from .models import Database, MqttDeviceType, RawDataStorage, Thing
+from .models import Database, MqttDeviceType, Parser, RawDataStorage, Thing
 
 from .utils import create_db_username, get_db_by_thing, get_storage_by_thing, get_random_chars, get_json_config
 from .mqtt_actions import publish_thing_config
@@ -68,8 +68,17 @@ def process_thing(sender, instance, **kwargs):
         storage.thing = thing
         storage.save()
 
-    if os.environ.get('PUBLISH_THING_TO_BROKER'):
+    if thing.datasource_type == 'MQTT':
+        publish(thing)
 
+
+@receiver(post_save, sender=Parser)
+def publish_settings(sender, instance, **kwargs):
+    publish(instance.thing)
+
+
+def publish(thing):
+    if os.environ.get('PUBLISH_THING_TO_BROKER'):
         if thing.is_ready:
             # create or update thing in the respective database
             publish_thing_config(get_json_config(thing))
