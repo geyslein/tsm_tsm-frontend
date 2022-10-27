@@ -62,8 +62,6 @@ class ThingForm(forms.ModelForm):
         if cleaned_data.get("datasource_type") == 'MQTT':
             fields = ['mqtt_uri', 'mqtt_username', 'mqtt_password', 'mqtt_topic', 'mqtt_device_type', ]
 
-        print(cleaned_data)
-
         for field in fields:
             if cleaned_data.get(field):
                 continue

@@ -68,7 +68,7 @@ def process_thing(sender, instance, **kwargs):
         storage.thing = thing
         storage.save()
 
-    if os.environ.get('PUBLISH_THING_TO_BROKER') is True:
+    if os.environ.get('PUBLISH_THING_TO_BROKER'):
 
         if thing.is_ready:
             # create or update thing in the respective database

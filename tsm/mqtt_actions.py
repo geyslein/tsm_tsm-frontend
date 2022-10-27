@@ -3,7 +3,7 @@ import json
 import paho.mqtt.client as mqtt
 
 
-def on_connect():
+def on_connect(client, userdata, flags, rc):
     print("Connected with MQTT-Broker")
 
 
