@@ -31,11 +31,10 @@ def get_connection_string(thing: Thing):
 
 
 def get_active_parser(thing: Thing):
-    parsers = Parser.objects.get(thing_id=thing.id)
-    for parser in parsers:
-        if parser.is_active:
-            return parser
-
+    try:
+        return Parser.objects.get(thing=thing.id, is_active=True)
+    except:
+        print("Cannot find active Parser for thing {}".format(thing.id))
 
 def get_random_chars(length: int):
     chars = string.ascii_letters + string.digits
