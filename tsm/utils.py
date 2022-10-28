@@ -90,20 +90,6 @@ def get_parser_properties(thing: Thing):
 
 def get_json_config(thing: Thing):
     storage: RawDataStorage = get_storage_by_thing(thing)
-
-    properties = {}
-    if thing.datasource_type == 'SFTP':
-        properties = get_parser_properties(thing)
-
-    if thing.datasource_type == 'MQTT':
-        default_parser = thing.mqtt_device_type.name
-        properties = {
-            "default_parser": default_parser,
-            "parsers": [
-                default_parser
-            ]
-        }
-
     db: Database = get_db_by_thing(thing)
 
     config = {
@@ -124,6 +110,23 @@ def get_json_config(thing: Thing):
             "password": storage.secret_key
         },
         "description": thing.description,
-        "properties": properties
     }
+
+    if thing.datasource_type == 'SFTP':
+        config['properties'] = get_parser_properties(thing)
+
+    if thing.datasource_type == 'MQTT':
+        default_parser = thing.mqtt_device_type.name
+        config['properties'] = {
+            "default_parser": default_parser,
+            "parsers": []
+        }
+
+        config['mqtt_authentication_credentials'] = {
+            "username": thing.mqtt_username,
+            "password": thing.mqtt_hashed_password,
+            "description": thing.mqtt_topic,
+            "properties": thing.mqtt_uri,
+        }
+
     return config
