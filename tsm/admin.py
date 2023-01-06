@@ -78,10 +78,9 @@ def publish_settings(sender, instance, **kwargs):
 
 
 def publish(thing):
-    if os.environ.get('PUBLISH_THING_TO_BROKER'):
-        if thing.is_ready:
-            # create or update thing in the respective database
-            publish_thing_config(get_json_config(thing))
+    if thing.is_ready:
+        # create or update thing in the respective database
+        publish_thing_config(get_json_config(thing))
 
 
 @receiver(pre_save, sender=Thing)

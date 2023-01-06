@@ -67,6 +67,17 @@ integration-test:
   image:
     name: "${IMAGE_URL}:${CI_JOB_DATE}"
     entrypoint: [""]
+  services:
+    - name: "eclipse-mosquitto"
+      alias: "mosquitto"
+      command:
+        - /usr/sbin/mosquitto
+        - -c
+        - mosquitto-no-auth.conf
+  variables:
+    MQTT_BROKER_HOST: "mosquitto"
+    MQTT_USER: "test"
+    MQTT_PASSWORD: "test"
   script:
     - "python3 manage.py check"
 
