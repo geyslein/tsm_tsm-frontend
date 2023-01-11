@@ -124,7 +124,7 @@ def get_json_config(thing: Thing):
 
         config['mqtt_authentication_credentials'] = {
             "username": thing.mqtt_username,
-            "password": thing.mqtt_hashed_password,
+            "password_hash": thing.mqtt_hashed_password,
             "description": thing.mqtt_topic,
             "properties": thing.mqtt_uri,
         }
