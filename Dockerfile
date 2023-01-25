@@ -51,6 +51,7 @@ ENV PATH=/home/appuser/.local/bin:$PATH
 # ENV PYTHONDONTWRITEBYTECODE=1 # Why not?
 ENV PYTHONUNBUFFERED=1
 
+ENV PGSSLROOTCERT=/etc/ssl/certs/ca-certificates.crt
 COPY --chown=appuser . /home/appuser/app/
 
 WORKDIR /home/appuser/app/
