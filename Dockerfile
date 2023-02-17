@@ -56,6 +56,6 @@ COPY --chown=appuser . /home/appuser/app/
 
 WORKDIR /home/appuser/app/
 RUN mkdir static
-# RUN python3 manage.py collectstatic
+RUN python3 manage.py collectstatic
 ENTRYPOINT ["python3", "manage.py"]
 
