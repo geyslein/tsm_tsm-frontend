@@ -28,7 +28,7 @@ mqtt_config = {
 }
 
 # Do not try to connect the mqtt broker when using the Django cli (manage.py)
-if sys.argv[0] != 'manage.py':
+if 'manage.py' not in sys.argv[0]:
     client = mqtt.Client(protocol=mqtt.MQTTv5, userdata={"mqtt_config": mqtt_config})
     client.username_pw_set(mqtt_config['user'], mqtt_config['password'])
     client.on_connect = on_connect
