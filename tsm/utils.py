@@ -1,10 +1,8 @@
-from typing import List
 import re
 import secrets
 import string
 from .models import Database, Parser, RawDataStorage, Thing
 from django.contrib.auth.models import Group
-import datetime
 import uuid
 
 
@@ -25,7 +23,7 @@ def get_storage_by_thing(thing: Thing):
 def get_connection_string(thing: Thing):
     db = get_db_by_thing(thing)
     if db:
-        return 'postgresql://{}:{}@{}/{}'.format(db.username, db.password, db.url, db.name)
+        return f'postgresql://{db.username}:{db.password}@{db.url}/{db.name}'
     else:
         return '-'
 
@@ -34,7 +32,8 @@ def get_active_parser(thing: Thing):
     try:
         return Parser.objects.get(thing=thing.id, is_active=True)
     except:
-        print("Cannot find active Parser for thing {}".format(thing.id))
+        print(f"Cannot find active Parser for thing {thing.id}")
+
 
 def get_random_chars(length: int):
     chars = string.ascii_letters + string.digits
@@ -51,16 +50,16 @@ def create_db_username(group: Group):
     return re.sub(
         '[^a-z0-9_]+',
         '',
-        '{shortname}_{uuid}'.format(shortname=name[0:30].lower(), uuid=str(uuid.uuid4()))
+        f'{name[0:30].lower()}_{uuid.uuid4()}'
     )
 
 
-def create_project_shortname(thing: Thing):
+def create_bucket_name(thing: Thing):
     group = thing.group.name.replace(' ', '')
     return re.sub(
         '[^a-z0-9_]+',
         '',
-        '{shortname}_{thing_id}'.format(shortname=group[:26].lower(), thing_id=str(thing.thing_id))
+        f'{group[:26].lower()}_{thing.thing_id}'
     )
 
 

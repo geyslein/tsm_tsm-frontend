@@ -9,7 +9,7 @@ from django.dispatch import receiver
 
 from .models import Database, MqttDeviceType, Parser, RawDataStorage, Thing
 
-from .utils import create_db_username, create_project_shortname, get_db_by_thing, get_storage_by_thing, get_random_chars, get_json_config
+from .utils import create_db_username, create_bucket_name, get_db_by_thing, get_storage_by_thing, get_random_chars, get_json_config
 from .mqtt_actions import publish_thing_config
 from .forms import ThingAdmin
 import os
@@ -59,7 +59,7 @@ def process_thing(sender, instance, **kwargs):
 
     if get_storage_by_thing(thing) is None:
 
-        name = create_project_shortname(thing)
+        name = create_bucket_name(thing)
 
         storage = RawDataStorage()
         storage.bucket = name
