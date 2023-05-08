@@ -55,6 +55,15 @@ def create_db_username(group: Group):
     )
 
 
+def create_project_shortname(thing: Thing):
+    group = thing.group.name.replace(' ', '')
+    return re.sub(
+        '[^a-z0-9_]+',
+        '',
+        '{shortname}_{thing_id}'.format(shortname=group[:26].lower(), thing_id=str(thing.thing_id))
+    )
+
+
 def get_parser_properties(thing: Thing):
     thing_parser: Parser = get_active_parser(thing)
 
