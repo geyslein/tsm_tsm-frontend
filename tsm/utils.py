@@ -59,7 +59,7 @@ def create_bucket_name(thing: Thing):
     return re.sub(
         '[^a-z0-9_]+',
         '',
-        f'{group[:26].lower()}_{thing.thing_id}'
+        f'{group[:26].lower()}-{thing.thing_id}'
     )
 
 
