@@ -50,6 +50,7 @@ def process_thing(sender, instance, **kwargs):
 
     if database is None:
         database = Database()
+        print(os.environ)
         database.url = os.environ.get('CREATEDB_POSTGRES_HOST')
         database.name = os.environ.get('CREATEDB_POSTGRES_DATABASE')
         database.username = create_db_username(thing.group)
