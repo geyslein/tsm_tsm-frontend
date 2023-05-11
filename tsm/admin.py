@@ -14,10 +14,6 @@ from .mqtt_actions import publish_thing_config
 from .forms import ThingAdmin
 import os
 
-CREATEDB_POSTGRES_HOST = os.environ.get('CREATEDB_POSTGRES_HOST')
-CREATEDB_POSTGRES_DATABASE = os.environ.get('CREATEDB_POSTGRES_DATABASE')
-
-
 class BasicAdminSite(admin.AdminSite):
     def about(self, request):
         context = dict(
