@@ -53,8 +53,8 @@ def process_thing(sender, instance, **kwargs):
 
     if database is None:
         database = Database()
-        database.url = CREATEDB_POSTGRES_HOST
-        database.name = CREATEDB_POSTGRES_DATABASE
+        database.url = "postgres.intranet.ufz.de"
+        database.name = "rdm_tsm?sslmode=verify-full"
         database.username = create_db_username(thing.group)
         database.password = get_random_chars(24)
         database.group = thing.group
