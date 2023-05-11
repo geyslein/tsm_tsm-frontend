@@ -14,6 +14,9 @@ from .mqtt_actions import publish_thing_config
 from .forms import ThingAdmin
 import os
 
+CREATEDB_POSTGRES_HOST = os.environ.get('CREATEDB_POSTGRES_HOST')
+CREATEDB_POSTGRES_DATABASE = os.environ.get('CREATEDB_POSTGRES_DATABASE')
+
 
 class BasicAdminSite(admin.AdminSite):
     def about(self, request):
@@ -50,8 +53,8 @@ def process_thing(sender, instance, **kwargs):
 
     if database is None:
         database = Database()
-        database.url = os.environ.get('CREATEDB_POSTGRES_HOST')
-        database.name = os.environ.get('CREATEDB_POSTGRES_DATABASE')
+        database.url = CREATEDB_POSTGRES_HOST
+        database.name = CREATEDB_POSTGRES_DATABASE
         database.username = create_db_username(thing.group)
         database.password = get_random_chars(24)
         database.group = thing.group
