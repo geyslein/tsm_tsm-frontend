@@ -50,8 +50,8 @@ def process_thing(sender, instance, **kwargs):
 
     if database is None:
         database = Database()
-        database.url = os.environ.get('TSM_DATABASE_HOST')
-        database.name = os.environ.get('TSM_DATABASE_NAME')
+        database.url = os.environ.get('CREATEDB_POSTGRES_HOST')
+        database.name = os.environ.get('CREATEDB_POSTGRES_DATABASE')
         database.username = create_db_username(thing.group)
         database.password = get_random_chars(24)
         database.group = thing.group
