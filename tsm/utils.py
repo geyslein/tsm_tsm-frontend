@@ -57,7 +57,7 @@ def create_db_username(group: Group):
 def create_bucket_name(thing: Thing):
     group = thing.group.name.replace(' ', '')
     return re.sub(
-        '[^a-z0-9_]+',
+        '[^a-z0-9-]+',
         '',
         f'{group[:26].lower()}-{thing.thing_id}'
     )
